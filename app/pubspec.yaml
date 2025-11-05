@@ -1,0 +1,40 @@
+name: netshots
+description: "A new Flutter project."
+publish_to: 'none'
+
+environment:
+  sdk: ^3.8.1
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`.
+dependencies:
+  flutter_localizations:
+    sdk: flutter
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.2.2
+  http: ^1.2.1
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.5
+  flutter_svg: ^2.2.0
+  image_picker: ^1.0.4
+  path_provider: ^2.1.2
+  path: ^1.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
+
+flutter:
+  uses-material-design: true
+  assets: 
+    - assets/logo.png
+    - assets/default_image_profile.jpg
+# Note: launcher icon and native splash configuration have been
+# moved to separate files:
+# - flutter_launcher_icons.yaml
+# - flutter_native_splash.yaml

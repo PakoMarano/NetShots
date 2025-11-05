@@ -1,0 +1,6 @@
+# flutter pub run flutter_native_splash:create
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/logo_with_text.png
+  android: true
+  ios: true
