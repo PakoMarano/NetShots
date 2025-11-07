@@ -12,6 +12,7 @@ import 'package:netshots/ui/auth/register/register_viewmodel.dart';
 import 'package:netshots/ui/core/themes/theme.dart';
 import 'package:netshots/ui/follow_requests/follow_request_viewmodel.dart';
 import 'package:netshots/ui/home/home_viewmodel.dart';
+import 'package:netshots/ui/friends/friends_viewmodel.dart';
 import 'package:netshots/ui/profile/create_profile/create_profile_screen.dart';
 import 'package:netshots/ui/profile/create_profile/create_profile_viewmodel.dart';
 import 'package:netshots/ui/profile/delete_profile/delete_profile_viewmodel.dart';
@@ -128,6 +129,9 @@ class MyApp extends StatelessWidget {
             ),
             ChangeNotifierProvider<FollowRequestViewModel>(
               create: (_) => FollowRequestViewModel(),
+            ),
+            ChangeNotifierProvider<FriendsViewModel>(
+              create: (_) => FriendsViewModel(),
             ),
             ChangeNotifierProvider<UserSearchViewModel>(
               create: (_) => UserSearchViewModel(),
