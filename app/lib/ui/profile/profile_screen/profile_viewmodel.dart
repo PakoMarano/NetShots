@@ -3,6 +3,7 @@ import 'package:netshots/data/models/user_profile_model.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/image_storage_repository.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
+import 'package:netshots/data/models/match_model.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final ProfileRepository _profileRepository;
@@ -12,6 +13,7 @@ class ProfileViewModel extends ChangeNotifier {
   UserProfile? _userProfile;
   bool _isLoading = false;
   List<String> _gallery = [];
+  List<MatchModel> _galleryMatches = [];
 
   ProfileViewModel(this._profileRepository, this._imageStorageRepository, this._matchRepository) {
     loadUserProfile();
@@ -21,6 +23,7 @@ class ProfileViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isEmpty => _userProfile == null;
   List<String> get gallery => _gallery;
+  List<MatchModel> get galleryMatches => _galleryMatches;
 
   Future<void> loadUserProfile() async {
     // Avoid reloading if profile is already loaded and not empty
@@ -99,11 +102,18 @@ class ProfileViewModel extends ChangeNotifier {
       final imageToDelete = _gallery[index];
 
       // Find the match that owns this picture and delete it
-      final matches = await _matchRepository.getMatches(_userProfile!.userId);
-      final matchList = matches.where((m) => m.picture == imageToDelete).toList();
-      if (matchList.isNotEmpty) {
-        final match = matchList.first;
-        await _matchRepository.deleteMatch(match.id);
+      MatchModel? owner;
+      if (_galleryMatches.isNotEmpty) {
+        final list = _galleryMatches.where((m) => m.picture == imageToDelete).toList();
+        if (list.isNotEmpty) owner = list.first;
+      }
+      if (owner == null) {
+        final matches = await _matchRepository.getMatches(_userProfile!.userId);
+        final matchList = matches.where((m) => m.picture == imageToDelete).toList();
+        if (matchList.isNotEmpty) owner = matchList.first;
+      }
+      if (owner != null) {
+        await _matchRepository.deleteMatch(owner.id);
       }
 
       // Delete the image file from storage
@@ -124,7 +134,13 @@ class ProfileViewModel extends ChangeNotifier {
   Future<void> loadGallery({int? limit}) async {
     if (_userProfile == null) return;
     try {
-      _gallery = await _matchRepository.getGalleryFromMatches(_userProfile!.userId, limit: limit);
+      // Fetch full matches so we can show notes alongside pictures
+      final matches = await _matchRepository.getMatches(_userProfile!.userId);
+      // sort by date desc
+      matches.sort((a, b) => b.date.compareTo(a.date));
+      _galleryMatches = matches;
+      final pictures = matches.map((m) => m.picture).where((p) => p.isNotEmpty).toList();
+      _gallery = limit != null && pictures.length > limit ? pictures.sublist(0, limit) : pictures;
     } catch (e) {
       _gallery = [];
     }

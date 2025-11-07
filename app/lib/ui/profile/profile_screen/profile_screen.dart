@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:netshots/ui/profile/profile_screen/profile_viewmodel.dart';
 import 'package:netshots/data/models/user_profile_model.dart';
+import 'package:netshots/data/models/match_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -38,8 +39,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (userProfile == null) {
           return const Center(child: Text('Nessun profilo trovato'));
         }
-        // Derive gallery images from matches
-        final pictures = viewModel.gallery;
+  // Derive gallery images and matches from view model
+  final pictures = viewModel.gallery;
+  final matches = viewModel.galleryMatches;
 
         return Scaffold(
           body: CustomScrollView(
@@ -89,6 +91,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
+                      // Prefer the full MatchModel so we can show notes; fallback to picture string
+                      if (index < matches.length) {
+                        final MatchModel match = matches[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                          child: _buildPhotoWithNote(match, index),
+                        );
+                      }
                       final photoUrl = pictures[index];
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
@@ -234,40 +244,146 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
 
   Widget _buildPhotoRow(String photoUrl, int index) {
+    // Provide a card background and ensure visibility in both light and dark modes
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => _selectImage(index),
-      child: Container(
-        height: 320,
-        decoration: BoxDecoration(
+      onLongPress: () => _selectImage(index),
+      child: Card(
+        elevation: isDark ? 3 : 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: theme.colorScheme.surface,
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          image: DecorationImage(
-            image: _getImageProvider(photoUrl),
-            fit: BoxFit.cover,
+          child: Container(
+            height: 320,
+            decoration: BoxDecoration(
+              border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
+              image: DecorationImage(
+                image: _getImageProvider(photoUrl),
+                fit: BoxFit.cover,
+              ),
+              boxShadow: isDark
+                  ? [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.75),
+                        blurRadius: 7,
+                        offset: const Offset(0, 2),
+                      )
+                    ]
+                  : null,
+            ),
+            child: Stack(
+              children: [
+                // top-right small edit icon
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: GestureDetector(
+                    onTap: () => _selectImage(index),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.delete,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        child: Stack(
+      ),
+    );
+  }
+
+  Widget _buildPhotoWithNote(MatchModel match, int index) {
+    // Group the photo and the note inside a card so users visually associate them.
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    return GestureDetector(
+      onTap: () => _selectImage(index),
+      onLongPress: () => _selectImage(index),
+      child: Card(
+        elevation: isDark ? 3 : 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: theme.colorScheme.surface,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // top-right small edit icon
-            Positioned(
-              top: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: () => _selectImage(index),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(16),
+            // Photo
+            ClipRRect(
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
+              child: Container(
+                height: 320,
+                decoration: BoxDecoration(
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
+                  image: DecorationImage(
+                    image: _getImageProvider(match.picture),
+                    fit: BoxFit.cover,
                   ),
-                  child: const Icon(
-                    Icons.delete,
-                    color: Colors.white,
-                    size: 18,
-                  ),
+                  boxShadow: isDark
+                      ? [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.6),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
+                      : null,
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: GestureDetector(
+                        onTap: () => _selectImage(index),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            // Note area with a light background to visually connect it to the photo
+            if (match.notes != null && match.notes!.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.03) : theme.colorScheme.surfaceVariant.withOpacity(0.9),
+                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
+                ),
+                child: Text(
+                  match.notes!,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: theme.colorScheme.onSurface.withOpacity(0.95),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
           ],
         ),
       ),

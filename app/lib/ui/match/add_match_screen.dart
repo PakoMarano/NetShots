@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:netshots/ui/match/add_match_viewmodel.dart';
@@ -186,11 +187,16 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
             ),
             const SizedBox(height: 12),
 
-            // Notes
+            // Notes (limited length)
             TextField(
               controller: _notesController,
               maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Note (opzionali)', border: OutlineInputBorder()),
+              maxLength: 140,
+              inputFormatters: [LengthLimitingTextInputFormatter(140)],
+              decoration: const InputDecoration(
+                labelText: 'Note (opzionali)',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 20),
 
