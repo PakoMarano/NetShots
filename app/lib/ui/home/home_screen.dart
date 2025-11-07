@@ -17,17 +17,44 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late PageController _pageController;
+  HomeViewModel? _homeVm;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    // Attach a listener to HomeViewModel after the first frame so we can
+    // animate the PageController when the view model index changes programmatically.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        _homeVm = Provider.of<HomeViewModel>(context, listen: false);
+        _homeVm?.addListener(_onHomeVmChanged);
+      } catch (_) {
+        _homeVm = null;
+      }
+    });
   }
 
   @override
   void dispose() {
+    // Remove listener if added
+    try {
+      _homeVm?.removeListener(_onHomeVmChanged);
+    } catch (_) {}
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _onHomeVmChanged() {
+    if (!mounted) return;
+    final idx = _homeVm?.currentIndex ?? 0;
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        idx,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override

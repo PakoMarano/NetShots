@@ -261,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: const Icon(
-                    Icons.edit,
+                    Icons.delete,
                     color: Colors.white,
                     size: 18,
                   ),
@@ -294,11 +294,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Navigator.of(context).pop();
                   _removeImage(index, viewModel);
                 },
-              ),
-              ListTile(
-                leading: const Icon(Icons.close),
-                title: const Text('Annulla'),
-                onTap: () => Navigator.of(context).pop(),
               ),
             ],
           ),
