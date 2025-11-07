@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:netshots/data/repositories/auth_repository.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
-import 'package:netshots/data/services/Image/image_storage_service_mock.dart';
+import 'package:netshots/data/services/image/image_storage_service_mock.dart';
 import 'package:netshots/data/repositories/image_storage_repository.dart';
 import 'package:netshots/data/services/auth/auth_service_mock.dart';
 import 'package:netshots/data/services/profile/profile_service_mock.dart';
@@ -22,6 +22,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'ui/auth/login/login_screen.dart';
+import 'package:netshots/data/services/match/match_service_mock.dart';
+import 'package:netshots/data/repositories/match_repository.dart';
 import 'ui/auth/register/register_screen.dart';
 import 'ui/home/home_screen.dart';
 
@@ -34,6 +36,8 @@ void main() async {
   final authRepository = AuthRepository(authService);
   final profileService = ProfileServiceMock(prefs);
   final profileRepository = ProfileRepository(profileService);
+  final matchService = MatchServiceMock(prefs);
+  final matchRepository = MatchRepository(matchService, profileService);
   final imageStorageService = ImageStorageServiceMock();
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
 
@@ -41,6 +45,7 @@ void main() async {
     authRepository: authRepository, 
     profileRepository: profileRepository,
     imageStorageRepository: imageStorageRepository,
+    matchRepository: matchRepository,
   ));
 }
 
@@ -48,12 +53,14 @@ class MyApp extends StatelessWidget {
   final AuthRepository authRepository;
   final ProfileRepository profileRepository;
   final ImageStorageRepository imageStorageRepository;
+  final MatchRepository matchRepository;
 
   const MyApp({
     super.key,
     required this.authRepository,
     required this.profileRepository,
     required this.imageStorageRepository,
+    required this.matchRepository,
   });
 
   @override
@@ -80,6 +87,7 @@ class MyApp extends StatelessWidget {
             Provider<AuthRepository>.value(value: authRepository),
             Provider<ProfileRepository>.value(value: profileRepository),
             Provider<ImageStorageRepository>.value(value: imageStorageRepository),
+            Provider<MatchRepository>.value(value: matchRepository),
             // ViewModel providers
             ChangeNotifierProvider<HomeViewModel>(
               create: (_) => HomeViewModel(),
@@ -94,7 +102,7 @@ class MyApp extends StatelessWidget {
               create: (_) => LogoutViewModel(authRepository),
             ),
             ChangeNotifierProvider<ProfileViewModel>(
-              create: (_) => ProfileViewModel(profileRepository, imageStorageRepository),
+              create: (_) => ProfileViewModel(profileRepository, imageStorageRepository, matchRepository),
             ),
             ChangeNotifierProvider<CreateProfileViewModel>(
               create: (context) {

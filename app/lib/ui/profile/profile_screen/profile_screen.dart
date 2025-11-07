@@ -38,7 +38,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (userProfile == null) {
           return const Center(child: Text('Nessun profilo trovato'));
         }
-        final pictures = userProfile.pictures;
+        // Derive gallery images from matches
+        final pictures = viewModel.gallery;
 
         return Scaffold(
           body: CustomScrollView(

@@ -1,4 +1,4 @@
-import 'package:netshots/data/services/Image/image_storage_service_interface.dart';
+import 'package:netshots/data/services/image/image_storage_service_interface.dart';
 
 class ImageStorageRepository {
   final ImageStorageServiceInterface _service;

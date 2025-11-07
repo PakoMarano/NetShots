@@ -2,20 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:netshots/data/models/user_profile_model.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/image_storage_repository.dart';
+import 'package:netshots/data/repositories/match_repository.dart';
 
 class ProfileViewModel extends ChangeNotifier {
   final ProfileRepository _profileRepository;
   final ImageStorageRepository _imageStorageRepository;
+  final MatchRepository _matchRepository;
+
   UserProfile? _userProfile;
   bool _isLoading = false;
+  List<String> _gallery = [];
 
-  ProfileViewModel(this._profileRepository, this._imageStorageRepository) {
+  ProfileViewModel(this._profileRepository, this._imageStorageRepository, this._matchRepository) {
     loadUserProfile();
   }
 
   UserProfile? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
   bool get isEmpty => _userProfile == null;
+  List<String> get gallery => _gallery;
 
   Future<void> loadUserProfile() async {
     // Avoid reloading if profile is already loaded and not empty
@@ -27,6 +32,10 @@ class ProfileViewModel extends ChangeNotifier {
     notifyListeners();
     try {
       _userProfile = await _profileRepository.getProfile();
+      // Load gallery derived from matches if we have a profile
+      if (_userProfile != null) {
+        await loadGallery();
+      }
     } catch (e) {
       // Handle error
       _userProfile = null;
@@ -79,30 +88,32 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> uploadPicture(String tempImagePath) async {
-    if (_userProfile == null) return;
+  Future<void> removePicture(int index) async {
+    // Removing a gallery picture removes the match that contains it.
+    if (_userProfile == null || index >= _gallery.length) return;
 
     try {
       _isLoading = true;
       notifyListeners();
 
-      // Save the image to permanent storage
-      final String permanentImagePath = await _imageStorageRepository.saveImage(tempImagePath);
+      final imageToDelete = _gallery[index];
 
-      // Create a new list with the appended picture
-      List<String> updatedPictures = List.from(_userProfile!.pictures);
-      updatedPictures.add(permanentImagePath);
+      // Find the match that owns this picture and delete it
+      final matches = await _matchRepository.getMatches(_userProfile!.userId);
+      final matchList = matches.where((m) => m.picture == imageToDelete).toList();
+      if (matchList.isNotEmpty) {
+        final match = matchList.first;
+        await _matchRepository.deleteMatch(match.id);
+      }
 
-      // Create updated profile using copyWith
-      final updatedProfile = _userProfile!.copyWith(
-        pictures: updatedPictures,
-      );
+      // Delete the image file from storage
+      if (imageToDelete.isNotEmpty) {
+  await _imageStorageRepository.deleteImage(imageToDelete);
+      }
 
-      // Update in repository and local state
-      await _profileRepository.updateProfile(updatedProfile);
-      _userProfile = updatedProfile;
+      // Refresh gallery
+      await loadGallery();
     } catch (e) {
-      // Handle error
       rethrow;
     } finally {
       _isLoading = false;
@@ -110,40 +121,14 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> removePicture(int index) async {
-    if (_userProfile == null || index >= _userProfile!.pictures.length) return;
-    
+  Future<void> loadGallery({int? limit}) async {
+    if (_userProfile == null) return;
     try {
-      _isLoading = true;
-      notifyListeners();
-      
-      // Create a new list and get the image to delete
-      List<String> updatedPictures = List.from(_userProfile!.pictures);
-      String imageToDelete = updatedPictures[index];
-      
-      // Remove the picture from the list
-      updatedPictures.removeAt(index);
-      
-      // Delete the image file from storage
-      if (imageToDelete.isNotEmpty) {
-        await _imageStorageRepository.deleteImage(imageToDelete);
-      }
-      
-      // Create updated profile using copyWith
-      final updatedProfile = _userProfile!.copyWith(
-        pictures: updatedPictures,
-      );
-      
-      // Update in repository and local state
-      await _profileRepository.updateProfile(updatedProfile);
-      _userProfile = updatedProfile;
+      _gallery = await _matchRepository.getGalleryFromMatches(_userProfile!.userId, limit: limit);
     } catch (e) {
-      // Handle error
-      rethrow;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+      _gallery = [];
     }
+    notifyListeners();
   }
 
   Future<void> setProfilePicture(String tempImagePath) async {

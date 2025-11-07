@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:netshots/data/services/Image/image_storage_service_interface.dart';
+import 'package:netshots/data/services/image/image_storage_service_interface.dart';
 
 class ImageStorageServiceMock implements ImageStorageServiceInterface {
   static const String _profileImagesFolder = 'profile_images';
