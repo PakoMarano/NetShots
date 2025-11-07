@@ -26,8 +26,8 @@ final darkTheme = ThemeData(
   brightness: Brightness.dark,
   primaryColor: primaryColor,
   colorScheme: ColorScheme.dark(
-    primary: primaryColor,
-    secondary: secondaryColor,
+    primary: secondaryColor,
+    secondary: primaryColor,
     surface: Color(0xFF121212),
     onPrimary: Color(0xFFFFFFFF),
     onSecondary: Color(0xFF000000),
@@ -38,5 +38,10 @@ final darkTheme = ThemeData(
   appBarTheme: AppBarTheme(
     backgroundColor: Color(0xFF121212),
     foregroundColor: Color(0xFFFFFFFF),
+  ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    selectedItemColor: secondaryColor,
+    unselectedItemColor: Colors.white70,
+    backgroundColor: Color(0xFF121212),
   ),
 );
