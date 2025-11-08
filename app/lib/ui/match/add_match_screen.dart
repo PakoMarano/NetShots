@@ -3,13 +3,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
+import 'package:netshots/ui/home/home_viewmodel.dart';
 import 'package:netshots/ui/match/add_match_viewmodel.dart';
 import 'package:netshots/ui/profile/profile_screen/profile_viewmodel.dart';
-import 'package:netshots/ui/home/home_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class AddMatchScreen extends StatefulWidget {
-  const AddMatchScreen({super.key});
+  final bool showAppBar;
+
+  const AddMatchScreen({super.key, this.showAppBar = true});
 
   @override
   State<AddMatchScreen> createState() => _AddMatchScreenState();
@@ -92,7 +94,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       // Navigate to profile tab (HomeScreen will animate PageView when HomeViewModel index changes)
       try {
         final homeVm = Provider.of<HomeViewModel>(context, listen: false);
-        homeVm.setCurrentIndex(2);
+  homeVm.setCurrentIndex(1);
       } catch (_) {}
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Partita aggiunta')));
@@ -118,100 +120,106 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Aggiungi partita'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image picker
-            Center(
-              child: GestureDetector(
-                onTap: () => _showImageOptions(),
-                child: Container(
-                  width: double.infinity,
-                  height: 220,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                    image: _imagePath != null
-                        ? DecorationImage(image: FileImage(File(_imagePath!)), fit: BoxFit.cover)
-                        : null,
-                    color: _imagePath == null ? Colors.grey.shade200 : null,
-                  ),
-                  child: _imagePath == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [Icon(Icons.camera_alt, size: 48), SizedBox(height: 8), Text('Tocca per aggiungere foto')],
-                        )
+    final Widget content = SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Image picker
+          Center(
+            child: GestureDetector(
+              onTap: () => _showImageOptions(),
+              child: Container(
+                width: double.infinity,
+                height: 220,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                  image: _imagePath != null
+                      ? DecorationImage(image: FileImage(File(_imagePath!)), fit: BoxFit.cover)
                       : null,
+                  color: _imagePath == null ? Colors.grey.shade200 : null,
                 ),
+                child: _imagePath == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [Icon(Icons.camera_alt, size: 48), SizedBox(height: 8), Text('Tocca per aggiungere foto')],
+                      )
+                    : null,
               ),
             ),
-            const SizedBox(height: 16),
+          ),
+          const SizedBox(height: 16),
 
-            // Victory toggle
-            Row(
-              children: [
-                const Text('Esito:'),
-                const SizedBox(width: 12),
-                ChoiceChip(
-                  label: Text('Vittoria', style: TextStyle(color: _isVictory ? Colors.white : null)),
-                  selected: _isVictory,
-                  selectedColor: Colors.green,
-                  onSelected: (v) => setState(() => _isVictory = true),
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: Text('Sconfitta', style: TextStyle(color: !_isVictory ? Colors.white : null)),
-                  selected: !_isVictory,
-                  selectedColor: Colors.red,
-                  onSelected: (v) => setState(() => _isVictory = false),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Date picker
-            Row(
-              children: [
-                const Text('Data: '),
-                const SizedBox(width: 8),
-                Text('${_date.day}/${_date.month}/${_date.year}'),
-                const SizedBox(width: 12),
-                ElevatedButton(onPressed: _pickDate, child: const Text('Cambia data')),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Notes (limited length)
-            TextField(
-              controller: _notesController,
-              maxLines: 3,
-              maxLength: 140,
-              inputFormatters: [LengthLimitingTextInputFormatter(140)],
-              decoration: const InputDecoration(
-                labelText: 'Note (opzionali)',
-                border: OutlineInputBorder(),
+          // Victory toggle
+          Row(
+            children: [
+              const Text('Esito:'),
+              const SizedBox(width: 12),
+              ChoiceChip(
+                label: Text('Vittoria', style: TextStyle(color: _isVictory ? Colors.white : null)),
+                selected: _isVictory,
+                selectedColor: Colors.green,
+                onSelected: (v) => setState(() => _isVictory = true),
               ),
-            ),
-            const SizedBox(height: 20),
-
-            // Submit
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isSubmitting ? null : _submit,
-                child: _isSubmitting ? const CircularProgressIndicator() : const Text('Aggiungi partita'),
+              const SizedBox(width: 8),
+              ChoiceChip(
+                label: Text('Sconfitta', style: TextStyle(color: !_isVictory ? Colors.white : null)),
+                selected: !_isVictory,
+                selectedColor: Colors.red,
+                onSelected: (v) => setState(() => _isVictory = false),
               ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Date picker
+          Row(
+            children: [
+              const Text('Data: '),
+              const SizedBox(width: 8),
+              Text('${_date.day}/${_date.month}/${_date.year}'),
+              const SizedBox(width: 12),
+              ElevatedButton(onPressed: _pickDate, child: const Text('Cambia data')),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Notes (limited length)
+          TextField(
+            controller: _notesController,
+            maxLines: 3,
+            maxLength: 140,
+            inputFormatters: [LengthLimitingTextInputFormatter(140)],
+            decoration: const InputDecoration(
+              labelText: 'Note (opzionali)',
+              border: OutlineInputBorder(),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+
+          // Submit
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isSubmitting ? null : _submit,
+              child: _isSubmitting ? const CircularProgressIndicator() : const Text('Aggiungi partita'),
+            ),
+          ),
+        ],
       ),
     );
+
+    if (widget.showAppBar) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Aggiungi partita'),
+        ),
+        body: content,
+      );
+    }
+
+    return content;
   }
 
   void _showImageOptions() {
