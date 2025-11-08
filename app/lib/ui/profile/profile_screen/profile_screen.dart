@@ -240,6 +240,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '${s}M';
   }
 
+  /// Short date formatter (DD/MM/YYYY)
+  String _formatDateShort(DateTime d) {
+    final dd = d.day.toString().padLeft(2, '0');
+    final mm = d.month.toString().padLeft(2, '0');
+    final yyyy = d.year.toString();
+    return '$dd/$mm/$yyyy';
+  }
+
   
 
   Widget _buildPhotoRow(String photoUrl, int index, {bool? isVictory}) {
@@ -412,6 +420,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: Colors.white,
                             size: 18,
                           ),
+                        ),
+                      ),
+                    ),
+                    // Date label at bottom-left of the photo
+                    Positioned(
+                      bottom: 8,
+                      left: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _formatDateShort(match.date),
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
                     ),
