@@ -63,20 +63,6 @@ class ProfileViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> updateUserProfile(UserProfile profile) async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      await _profileRepository.updateProfile(profile);
-      _userProfile = profile;
-    } catch (e) {
-      // Handle error
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
   Future<void> deleteProfile() async {
     _isLoading = true;
     notifyListeners();

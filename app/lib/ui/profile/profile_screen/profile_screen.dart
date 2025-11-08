@@ -96,7 +96,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         final MatchModel match = matches[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          child: _buildPhotoWithNote(match, index),
+                          child: _buildPhotoWithNote(match, index, isVictory: match.isVictory),
                         );
                       }
                       final photoUrl = pictures[index];
@@ -243,23 +243,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   
 
-  Widget _buildPhotoRow(String photoUrl, int index) {
+  Widget _buildPhotoRow(String photoUrl, int index, {bool? isVictory}) {
     // Provide a card background and ensure visibility in both light and dark modes
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final Color borderColor = isVictory == null
+        ? (isDark ? Colors.white10 : Colors.grey.shade300)
+        : (isVictory ? Colors.green : Colors.red);
+
     return GestureDetector(
       onTap: () => _selectImage(index),
       onLongPress: () => _selectImage(index),
       child: Card(
         elevation: isDark ? 3 : 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         color: theme.colorScheme.surface,
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
           child: Container(
             height: 320,
             decoration: BoxDecoration(
-              border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
+              border: Border.all(color: borderColor),
               image: DecorationImage(
                 image: _getImageProvider(photoUrl),
                 fit: BoxFit.cover,
@@ -276,6 +280,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: Stack(
               children: [
+                if (isVictory != null)
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: isVictory ? Colors.green : Colors.red,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isVictory ? Icons.emoji_events : Icons.close,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
                 // top-right small edit icon
                 Positioned(
                   top: 8,
@@ -304,10 +332,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildPhotoWithNote(MatchModel match, int index) {
+  Widget _buildPhotoWithNote(MatchModel match, int index, {bool? isVictory}) {
     // Group the photo and the note inside a card so users visually associate them.
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final Color borderColor = isVictory == null
+        ? (isDark ? Colors.white10 : Colors.grey.shade300)
+        : (isVictory ? Colors.green : Colors.red);
+
     return GestureDetector(
       onTap: () => _selectImage(index),
       onLongPress: () => _selectImage(index),
@@ -324,7 +356,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Container(
                 height: 320,
                 decoration: BoxDecoration(
-                  border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
+                  border: Border.all(color: borderColor),
                   image: DecorationImage(
                     image: _getImageProvider(match.picture),
                     fit: BoxFit.cover,
@@ -341,6 +373,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Stack(
                   children: [
+                    if (isVictory != null)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: isVictory ? Colors.green : Colors.red,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            isVictory ? Icons.emoji_events : Icons.close,
+                            color: Colors.white,
+                            size: 16,
+                          ),
+                        ),
+                      ),
                     Positioned(
                       top: 8,
                       right: 8,

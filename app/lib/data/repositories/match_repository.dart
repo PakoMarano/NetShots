@@ -75,10 +75,7 @@ class MatchRepository {
     final maps = await _matchService.getMatchesForUser(userId);
     return maps.map((m) => MatchModel.fromMap(m)).toList();
   }
-
-  /// Derive the user's gallery from their matches.
-  /// Returns picture paths/URLs sorted by match date descending.
-  /// If [limit] is provided, returns at most that many entries.
+  
   Future<List<String>> getGalleryFromMatches(String userId, {int? limit}) async {
     final matches = await getMatches(userId);
     final pictures = matches
