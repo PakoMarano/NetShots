@@ -16,8 +16,8 @@ class MockSearchService implements SearchServiceInterface {
 
   @override
   Future<List<String>> searchUsers(String query) async {
-    // Simulate a small network delay
-    await Future.delayed(const Duration(milliseconds: 500));
+  // Simulate a small network delay
+  await Future.delayed(const Duration(milliseconds: 300));
 
     if (query.isEmpty) return [];
 

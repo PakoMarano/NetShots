@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/search/search_service_mock.dart';
 
@@ -35,8 +35,8 @@ class UserSearchViewModel extends ChangeNotifier {
       return;
     }
 
-    // Debounce actual search call by 300ms
-    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+    // Debounce actual search call by 200ms (faster response)
+    _debounceTimer = Timer(const Duration(milliseconds: 200), () {
       _performSearch(query);
     });
   }

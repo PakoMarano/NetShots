@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:netshots/ui/user_search/user_search_bar.dart';
+import 'package:netshots/ui/user_search/user_search_sheet.dart';
 import 'friends_viewmodel.dart';
 
 class FriendsScreen extends StatelessWidget {
@@ -27,9 +29,36 @@ class FriendsScreen extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                   child: Column(
-                    children: const [
-                      SizedBox(height: 12),
-                      UserSearchBar(),
+                    children: [
+                      const SizedBox(height: 12),
+                      UserSearchBar(
+                        onTap: () async {
+                          // When tapped, open the search UI in a modal bottom sheet
+                          // so results are visible without leaving the current flow.
+                          final height = MediaQuery.of(context).size.height * 0.75;
+                          await showModalBottomSheet<void>(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (context) {
+                              return SizedBox(
+                                height: height,
+                                child: const UserSearchScreen(autoFocus: true),
+                              );
+                            },
+                          );
+
+                          // When the sheet closes (by dragging down or tapping outside),
+                          // ensure the keyboard is dismissed / search field is unfocused.
+                          try {
+                            FocusScope.of(context).unfocus();
+                            // Extra force-hide for the keyboard to cover edge cases
+                            // where focus lingers inside the sheet's state.
+                            SystemChannels.textInput.invokeMethod('TextInput.hide');
+                          } catch (_) {
+                            // Ignore any errors during cleanup.
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ),
