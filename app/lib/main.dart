@@ -29,6 +29,7 @@ import 'package:netshots/data/services/search/search_service_mock.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/follow/follow_service_mock.dart';
 import 'package:netshots/data/repositories/follow_repository.dart';
+import 'package:netshots/ui/follow/follow_viewmodel.dart';
 import 'ui/auth/register/register_screen.dart';
 import 'ui/home/home_screen.dart';
 
@@ -147,6 +148,9 @@ class MyApp extends StatelessWidget {
             ),
             ChangeNotifierProvider<UserSearchViewModel>(
               create: (_) => UserSearchViewModel(searchRepository),
+            ),
+            ChangeNotifierProvider<FollowViewModel>(
+              create: (context) => FollowViewModel(followRepository, Provider.of<AuthRepository>(context, listen: false))..init(),
             ),
           ],
           child: MaterialApp(
