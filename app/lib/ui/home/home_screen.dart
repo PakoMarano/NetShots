@@ -5,7 +5,6 @@ import 'package:netshots/ui/friends/friends_screen.dart';
 import 'package:netshots/ui/match/add_match_screen.dart';
 import 'package:netshots/ui/profile/profile_screen/profile_screen.dart';
 import 'package:netshots/ui/settings/settings_drawer.dart';
-import 'package:netshots/ui/follow_requests/follow_request_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -64,9 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         backgroundColor: Theme.of(context).primaryColor,
         foregroundColor: Colors.white,
-        actions: const [
-          FollowRequestButton(),
-        ],
       ),
       drawer: const SettingsDrawer(),
       body: Consumer<HomeViewModel>(

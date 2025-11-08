@@ -10,7 +10,6 @@ import 'package:netshots/ui/auth/login/login_viewmodel.dart';
 import 'package:netshots/ui/auth/logout/logout_viewmodel.dart';
 import 'package:netshots/ui/auth/register/register_viewmodel.dart';
 import 'package:netshots/ui/core/themes/theme.dart';
-import 'package:netshots/ui/follow_requests/follow_request_viewmodel.dart';
 import 'package:netshots/ui/home/home_viewmodel.dart';
 import 'package:netshots/ui/friends/friends_viewmodel.dart';
 import 'package:netshots/ui/profile/create_profile/create_profile_screen.dart';
@@ -28,6 +27,8 @@ import 'package:netshots/data/services/match/match_service_mock.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
 import 'package:netshots/data/services/search/search_service_mock.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
+import 'package:netshots/data/services/follow/follow_service_mock.dart';
+import 'package:netshots/data/repositories/follow_repository.dart';
 import 'ui/auth/register/register_screen.dart';
 import 'ui/home/home_screen.dart';
 
@@ -46,6 +47,8 @@ void main() async {
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
   final searchService = MockSearchService();
   final searchRepository = SearchRepository(searchService);
+  final followService = FollowServiceMock(prefs);
+  final followRepository = FollowRepository(followService);
 
   runApp(MyApp(
     authRepository: authRepository, 
@@ -53,6 +56,7 @@ void main() async {
     imageStorageRepository: imageStorageRepository,
     matchRepository: matchRepository,
     searchRepository: searchRepository,
+    followRepository: followRepository,
   ));
 }
 
@@ -62,6 +66,7 @@ class MyApp extends StatelessWidget {
   final ImageStorageRepository imageStorageRepository;
   final MatchRepository matchRepository;
   final SearchRepository searchRepository;
+  final FollowRepository followRepository;
 
   const MyApp({
     super.key,
@@ -70,6 +75,7 @@ class MyApp extends StatelessWidget {
     required this.imageStorageRepository,
     required this.matchRepository,
     required this.searchRepository,
+    required this.followRepository,
   });
 
   @override
@@ -97,7 +103,8 @@ class MyApp extends StatelessWidget {
             Provider<ProfileRepository>.value(value: profileRepository),
             Provider<ImageStorageRepository>.value(value: imageStorageRepository),
             Provider<MatchRepository>.value(value: matchRepository),
-                Provider<SearchRepository>.value(value: searchRepository),
+        Provider<SearchRepository>.value(value: searchRepository),
+        Provider<FollowRepository>.value(value: followRepository),
             // ViewModel providers
             ChangeNotifierProvider<HomeViewModel>(
               create: (_) => HomeViewModel(),
@@ -134,9 +141,6 @@ class MyApp extends StatelessWidget {
             ),
             ChangeNotifierProvider<DeleteProfileViewModel>(
               create: (_) => DeleteProfileViewModel(profileRepository),
-            ),
-            ChangeNotifierProvider<FollowRequestViewModel>(
-              create: (_) => FollowRequestViewModel(),
             ),
             ChangeNotifierProvider<FriendsViewModel>(
               create: (_) => FriendsViewModel(),
