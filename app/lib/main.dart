@@ -26,6 +26,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'ui/auth/login/login_screen.dart';
 import 'package:netshots/data/services/match/match_service_mock.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
+import 'package:netshots/data/services/search/search_service_mock.dart';
+import 'package:netshots/data/repositories/search_repository.dart';
 import 'ui/auth/register/register_screen.dart';
 import 'ui/home/home_screen.dart';
 
@@ -42,12 +44,16 @@ void main() async {
   final matchRepository = MatchRepository(matchService, profileService);
   final imageStorageService = ImageStorageServiceMock();
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
+  // Search service + repository (mock for now)
+  final searchService = MockSearchService();
+  final searchRepository = SearchRepository(searchService);
 
   runApp(MyApp(
     authRepository: authRepository, 
     profileRepository: profileRepository,
     imageStorageRepository: imageStorageRepository,
     matchRepository: matchRepository,
+    searchRepository: searchRepository,
   ));
 }
 
@@ -56,6 +62,7 @@ class MyApp extends StatelessWidget {
   final ProfileRepository profileRepository;
   final ImageStorageRepository imageStorageRepository;
   final MatchRepository matchRepository;
+  final SearchRepository searchRepository;
 
   const MyApp({
     super.key,
@@ -63,6 +70,7 @@ class MyApp extends StatelessWidget {
     required this.profileRepository,
     required this.imageStorageRepository,
     required this.matchRepository,
+    required this.searchRepository,
   });
 
   @override
@@ -90,6 +98,7 @@ class MyApp extends StatelessWidget {
             Provider<ProfileRepository>.value(value: profileRepository),
             Provider<ImageStorageRepository>.value(value: imageStorageRepository),
             Provider<MatchRepository>.value(value: matchRepository),
+                Provider<SearchRepository>.value(value: searchRepository),
             // ViewModel providers
             ChangeNotifierProvider<HomeViewModel>(
               create: (_) => HomeViewModel(),
@@ -134,7 +143,7 @@ class MyApp extends StatelessWidget {
               create: (_) => FriendsViewModel(),
             ),
             ChangeNotifierProvider<UserSearchViewModel>(
-              create: (_) => UserSearchViewModel(),
+              create: (_) => UserSearchViewModel(searchRepository),
             ),
           ],
           child: MaterialApp(

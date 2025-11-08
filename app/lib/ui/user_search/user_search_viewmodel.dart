@@ -1,9 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:netshots/data/repositories/search_repository.dart';
+import 'package:netshots/data/services/search/search_service_mock.dart';
 
 class UserSearchViewModel extends ChangeNotifier {
+  final SearchRepository _searchRepository;
+
+  // Optional debounce to avoid firing too many requests
+  Timer? _debounceTimer;
+
   String _searchQuery = '';
   bool _isSearching = false;
   List<String> _searchResults = [];
+
+  UserSearchViewModel([SearchRepository? repository])
+      : _searchRepository = repository ?? SearchRepository(MockSearchService());
 
   String get searchQuery => _searchQuery;
   bool get isSearching => _isSearching;
@@ -14,55 +26,59 @@ class UserSearchViewModel extends ChangeNotifier {
   void updateSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
-    
-    // Simulate search with a small delay
-    if (query.isNotEmpty) {
-      _performSearch(query);
-    } else {
+
+    // Cancel any pending debounce timer
+    _debounceTimer?.cancel();
+
+    if (query.isEmpty) {
       _clearResults();
+      return;
     }
+
+    // Debounce actual search call by 300ms
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _performSearch(query);
+    });
   }
 
-  void _performSearch(String query) async {
+  Future<void> _performSearch(String query) async {
     _isSearching = true;
     notifyListeners();
 
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
+    // Capture the query at start so stale results can be ignored
+    final requestQuery = query;
 
-    // Mock search results for now
-    _searchResults = _generateMockResults(query);
-    _isSearching = false;
-    notifyListeners();
+    try {
+      final results = await _searchRepository.searchUsers(requestQuery);
+
+      // If the user typed a new query meanwhile, ignore these results
+      if (requestQuery != _searchQuery) return;
+
+      _searchResults = results;
+    } catch (e) {
+      // On error, clear results (could surface error state if needed)
+      _searchResults = [];
+    } finally {
+      _isSearching = false;
+      notifyListeners();
+    }
   }
 
   void _clearResults() {
-    _searchResults.clear();
+    _searchResults = [];
     _isSearching = false;
     notifyListeners();
-  }
-
-  List<String> _generateMockResults(String query) {
-    // Mock data for demonstration
-    final mockUsers = [
-      'Marco Rossi',
-      'Giulia Bianchi', 
-      'Alessandro Verdi',
-      'Francesca Neri',
-      'Luca Ferrari',
-      'Sara Romano',
-      'Davide Ricci',
-      'Elena Conti',
-    ];
-
-    // Filter mock users based on query
-    return mockUsers
-        .where((user) => user.toLowerCase().contains(query.toLowerCase()))
-        .toList();
   }
 
   void clearSearch() {
     _searchQuery = '';
+    _debounceTimer?.cancel();
     _clearResults();
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 }
