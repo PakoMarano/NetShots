@@ -46,7 +46,7 @@ void main() async {
   final matchRepository = MatchRepository(matchService, profileService);
   final imageStorageService = ImageStorageServiceMock();
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
-  final searchService = MockSearchService();
+  final searchService = MockSearchService(prefs);
   final searchRepository = SearchRepository(searchService);
   final followService = FollowServiceMock(prefs);
   final followRepository = FollowRepository(followService);

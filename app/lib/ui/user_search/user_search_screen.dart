@@ -79,13 +79,18 @@ class UserSearchScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final user = viewModel.searchResults[index];
                       return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.grey.shade300,
-                          child: Icon(
-                            Icons.person,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
+                        leading: user.profilePicture != null && user.profilePicture!.isNotEmpty
+                            ? CircleAvatar(
+                                backgroundImage: NetworkImage(user.profilePicture!),
+                                backgroundColor: Colors.grey.shade200,
+                              )
+                            : CircleAvatar(
+                                backgroundColor: Colors.grey.shade300,
+                                child: Icon(
+                                  Icons.person,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ),
                         title: _buildHighlightedText(user.displayName, viewModel.searchQuery, context),
                         subtitle: Text('@${user.userId}'),
                         trailing: FollowButton(targetId: user.userId, displayName: user.displayName),

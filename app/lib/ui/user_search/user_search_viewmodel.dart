@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
-import 'package:netshots/data/services/search/search_service_mock.dart';
+import 'package:netshots/data/models/search_user_model.dart';
 
 class UserSearchViewModel extends ChangeNotifier {
   final SearchRepository _searchRepository;
@@ -12,14 +12,13 @@ class UserSearchViewModel extends ChangeNotifier {
 
   String _searchQuery = '';
   bool _isSearching = false;
-  List<String> _searchResults = [];
+  List<SearchUser> _searchResults = [];
 
-  UserSearchViewModel([SearchRepository? repository])
-      : _searchRepository = repository ?? SearchRepository(MockSearchService());
+  UserSearchViewModel(this._searchRepository);
 
   String get searchQuery => _searchQuery;
   bool get isSearching => _isSearching;
-  List<String> get searchResults => _searchResults;
+  List<SearchUser> get searchResults => _searchResults;
   bool get hasResults => _searchResults.isNotEmpty;
   bool get isEmpty => _searchQuery.isEmpty;
 
@@ -49,12 +48,12 @@ class UserSearchViewModel extends ChangeNotifier {
     final requestQuery = query;
 
     try {
-      final results = await _searchRepository.searchUsers(requestQuery);
+  final results = await _searchRepository.searchUsers(requestQuery);
 
       // If the user typed a new query meanwhile, ignore these results
       if (requestQuery != _searchQuery) return;
 
-      _searchResults = results;
+  _searchResults = results;
     } catch (e) {
       // On error, clear results (could surface error state if needed)
       _searchResults = [];
