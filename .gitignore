@@ -20,3 +20,10 @@ db.sqlite3
 # OS
 .DS_Store
 Thumbs.db
+
+# Local Database (Requirement 10)
+*.db
+
+# OS specific
+.DS_Store
+Thumbs.db

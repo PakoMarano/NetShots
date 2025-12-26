@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "329068587790",
+    "project_id": "netshots-4b60f",
+    "storage_bucket": "netshots-4b60f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329068587790:android:f78638b83a39785932055f",
+        "android_client_info": {
+          "package_name": "com.example.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuubb2bVRPK2-GT9Yoct4jYP8lcwXyx9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
