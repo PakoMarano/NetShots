@@ -1,7 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netshots/data/services/auth/auth_service_interface.dart';
 
-class AuthServiceMock implements IAuthService {
+class AuthServiceMock implements AuthServiceInterface {
   final SharedPreferences _sharedPreferences;
 
   AuthServiceMock(this._sharedPreferences);

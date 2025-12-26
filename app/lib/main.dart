@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,7 +8,7 @@ import 'package:netshots/data/repositories/image_storage_repository.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
-import 'package:netshots/data/services/auth/auth_service_mock.dart';
+import 'package:netshots/data/services/auth/auth_service_firebase.dart';
 import 'package:netshots/data/services/follow/follow_service_mock.dart';
 import 'package:netshots/data/services/image/image_storage_service_mock.dart';
 import 'package:netshots/data/services/match/match_service_mock.dart';
@@ -44,7 +45,7 @@ void main() async {
 
   // Initialize SharedPreferences and repositories
   final prefs = await SharedPreferences.getInstance();
-  final authService = AuthServiceMock(prefs);
+  final authService = AuthServiceFirebase(FirebaseAuth.instance);
   final authRepository = AuthRepository(authService);
   final profileService = ProfileServiceMock(prefs);
   final profileRepository = ProfileRepository(profileService);

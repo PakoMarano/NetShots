@@ -1,7 +1,7 @@
-import 'package:netshots/data/services/auth/auth_service_mock.dart';
+import 'package:netshots/data/services/auth/auth_service_interface.dart';
 
 class AuthRepository {
-  final AuthServiceMock _authService;
+  final AuthServiceInterface _authService;
 
   AuthRepository(this._authService);
 
