@@ -1,8 +1,8 @@
-import 'package:netshots/data/services/profile/profile_service_mock.dart';
+import 'package:netshots/data/services/profile/profile_service_interface.dart';
 import 'package:netshots/data/models/user_profile_model.dart';
 
 class ProfileRepository {
-  final ProfileServiceMock _profileService; 
+  final ProfileServiceInterface _profileService; 
 
   ProfileRepository(this._profileService);
 

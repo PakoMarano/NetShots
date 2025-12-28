@@ -1,7 +1,7 @@
-import 'package:netshots/data/services/follow/follow_service_mock.dart';
+import 'package:netshots/data/services/follow/follow_service_interface.dart';
 
 class FollowRepository {
-  final FollowServiceMock _service;
+  final FollowServiceInterface _service;
 
   FollowRepository(this._service);
 

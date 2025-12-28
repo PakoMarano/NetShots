@@ -12,7 +12,7 @@ import 'package:netshots/data/services/auth/auth_service_firebase.dart';
 import 'package:netshots/data/services/follow/follow_service_mock.dart';
 import 'package:netshots/data/services/image/image_storage_service_mock.dart';
 import 'package:netshots/data/services/match/match_service_mock.dart';
-import 'package:netshots/data/services/profile/profile_service_mock.dart';
+import 'package:netshots/data/services/profile/profile_service_http.dart';
 import 'package:netshots/data/services/search/search_service_mock.dart';
 import 'package:netshots/ui/auth/login/login_viewmodel.dart';
 import 'package:netshots/ui/auth/logout/logout_viewmodel.dart';
@@ -47,7 +47,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final authService = AuthServiceFirebase(FirebaseAuth.instance);
   final authRepository = AuthRepository(authService);
-  final profileService = ProfileServiceMock(prefs);
+  final profileService = ProfileServiceHttp(FirebaseAuth.instance);
   final profileRepository = ProfileRepository(profileService);
   final matchService = MatchServiceMock(prefs);
   final matchRepository = MatchRepository(matchService, profileService);
