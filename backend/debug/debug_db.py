@@ -1,8 +1,13 @@
 """
 Debug script to display database contents.
-Usage: python debug_db.py
+Usage: python -m debug.debug_db (from backend directory)
 """
 import os
+import sys
+
+# Add parent directory to path to import backend modules
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from app import create_app
 from models import UserProfile, Match
 from database import db

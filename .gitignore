@@ -27,3 +27,6 @@ Thumbs.db
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Firebase credentials
+netshots-4b60f-firebase-adminsdk-fbsvc-9e3d8d5826.json
