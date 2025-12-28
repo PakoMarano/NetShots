@@ -43,7 +43,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize SharedPreferences and repositories
+  // Initialize repositories
   final prefs = await SharedPreferences.getInstance();
   final authService = AuthServiceFirebase(FirebaseAuth.instance);
   final authRepository = AuthRepository(authService);
@@ -111,8 +111,8 @@ class MyApp extends StatelessWidget {
             Provider<ProfileRepository>.value(value: profileRepository),
             Provider<ImageStorageRepository>.value(value: imageStorageRepository),
             Provider<MatchRepository>.value(value: matchRepository),
-        Provider<SearchRepository>.value(value: searchRepository),
-        Provider<FollowRepository>.value(value: followRepository),
+            Provider<SearchRepository>.value(value: searchRepository),
+            Provider<FollowRepository>.value(value: followRepository),
             // ViewModel providers
             ChangeNotifierProvider<HomeViewModel>(
               create: (_) => HomeViewModel(),
