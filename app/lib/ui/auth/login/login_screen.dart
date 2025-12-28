@@ -84,6 +84,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     final viewModel = _viewModel;
     
+    // Handle error message
+    if (viewModel?.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(viewModel!.errorMessage!))
+      );
+      viewModel.clearError();
+    }
+    
     // Handle navigation
     if (viewModel?.isLoginSuccessful == true) {
       Navigator.pushReplacementNamed(context, '/home');
