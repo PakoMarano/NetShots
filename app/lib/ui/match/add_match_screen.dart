@@ -34,6 +34,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? picked = await _picker.pickImage(source: source, maxWidth: 1600, maxHeight: 1200, imageQuality: 85);
+      if (!mounted) return;
       if (picked != null) {
         setState(() {
           _imagePath = picked.path;
@@ -53,6 +54,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       firstDate: DateTime(2000),
       lastDate: DateTime.now(),
     );
+    if (!mounted) return;
     if (picked != null) {
       setState(() {
         _date = picked;

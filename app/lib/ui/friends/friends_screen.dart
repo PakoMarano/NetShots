@@ -47,6 +47,8 @@ class FriendsScreen extends StatelessWidget {
                             },
                           );
 
+                          if (!context.mounted) return;
+
                           // When the sheet closes (by dragging down or tapping outside),
                           // ensure the keyboard is dismissed / search field is unfocused.
                           try {

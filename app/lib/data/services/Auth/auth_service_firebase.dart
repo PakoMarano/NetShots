@@ -45,6 +45,7 @@ class AuthServiceFirebase implements AuthServiceInterface {
     return _firebaseAuth.currentUser?.uid;
   }
 
+  @override
   String? getCurrentUserEmail() {
     return _firebaseAuth.currentUser?.email;
   }

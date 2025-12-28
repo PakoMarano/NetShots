@@ -278,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               boxShadow: isDark
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.75),
+                        color: Colors.black.withValues(alpha: 0.75),
                         blurRadius: 7,
                         offset: const Offset(0, 2),
                       )
@@ -298,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -371,7 +371,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   boxShadow: isDark
                       ? [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.6),
+                            color: Colors.black.withValues(alpha: 0.6),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           )
@@ -391,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -450,14 +450,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withOpacity(0.03) : theme.colorScheme.surfaceVariant.withOpacity(0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.03) : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
                   borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
                 ),
                 child: Text(
                   match.notes!,
                   style: TextStyle(
                     fontSize: 15,
-                    color: theme.colorScheme.onSurface.withOpacity(0.95),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,

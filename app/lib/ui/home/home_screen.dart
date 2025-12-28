@@ -113,6 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             );
 
+            if (!context.mounted) return;
+
             if (result == true) {
               try {
                 final vm = Provider.of<HomeViewModel>(context, listen: false);

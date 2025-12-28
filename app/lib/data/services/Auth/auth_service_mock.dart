@@ -52,6 +52,7 @@ class AuthServiceMock implements AuthServiceInterface {
     return _sharedPreferences.getString('auth_token') != null ? 'mockUserId' : null;
   }
 
+  @override
   String? getCurrentUserEmail() {
     // Get the stored email for the current user
     return _sharedPreferences.getString('user_email');
