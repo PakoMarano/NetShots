@@ -8,12 +8,19 @@ class CreateProfileViewModel extends ChangeNotifier {
   final AuthRepository _authRepository;
   bool _isProfileCreated = false;
   bool _isLoading = false;
+  String? _errorMessage;
   VoidCallback? _onProfileCreated;
 
   CreateProfileViewModel(this._profileRepository, this._authRepository);
 
   bool get isProfileCreated => _isProfileCreated;
   bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
+  
+  void clearError() {
+    _errorMessage = null;
+    notifyListeners();
+  }
   
   void setOnProfileCreatedCallback(VoidCallback callback) {
     _onProfileCreated = callback;
@@ -27,6 +34,7 @@ class CreateProfileViewModel extends ChangeNotifier {
   ) async {
     try {
       _isLoading = true;
+      _errorMessage = null;
       notifyListeners();
 
       final userId = _authRepository.getCurrentUserId();
@@ -56,8 +64,8 @@ class CreateProfileViewModel extends ChangeNotifier {
       _onProfileCreated?.call();
     } catch (e) {
       _isLoading = false;
+      _errorMessage = e.toString();
       notifyListeners();
-      // Handle error
     }
   }
 }

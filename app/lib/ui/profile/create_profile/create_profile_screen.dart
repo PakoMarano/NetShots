@@ -146,6 +146,14 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
   void _onViewModelChanged() {
     if (!mounted || _viewModel == null) return;
     
+    // Handle error message
+    if (_viewModel!.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_viewModel!.errorMessage!))
+      );
+      _viewModel!.clearError();
+    }
+    
     // Handle navigation
     if (_viewModel!.isProfileCreated) {
       Navigator.pushReplacementNamed(context, '/home');

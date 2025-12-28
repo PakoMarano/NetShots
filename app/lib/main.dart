@@ -36,7 +36,7 @@ import 'ui/auth/login/login_screen.dart';
 import 'ui/auth/register/register_screen.dart';
 import 'ui/home/home_screen.dart';
 
-const String kBackendBaseUrl = 'http://192.168.1.26:5000';
+const String kBackendBaseUrl = "https://pakomarano.pythonanywhere.com";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

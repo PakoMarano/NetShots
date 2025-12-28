@@ -37,7 +37,6 @@ class ProfileServiceHttp implements ProfileServiceInterface {
       final headers = await _getHeaders();
       final url = Uri.parse('$baseUrl/api/profiles');
 
-      print('Creating profile with data: $profileData at $url');
       final response = await http.post(
         url,
         headers: headers,
