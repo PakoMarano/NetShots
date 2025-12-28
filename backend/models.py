@@ -122,6 +122,55 @@ class UserProfile(db.Model):
 			self.pictures = _parse_pictures(payload.get("pictures"))
 
 
+	class Match(db.Model):
+		__tablename__ = "matches"
+
+		id = db.Column(db.String(128), primary_key=True)
+		user_id = db.Column(db.String(128), db.ForeignKey("user_profiles.uid"), nullable=False, index=True)
+		is_victory = db.Column(db.Boolean, nullable=False, default=False)
+		date = db.Column(db.DateTime, nullable=False)
+		picture = db.Column(db.String(500), nullable=False)
+		notes = db.Column(db.Text)
+		created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+
+		user = db.relationship("UserProfile", backref=db.backref("matches", lazy=True))
+
+		def to_dict(self) -> Dict[str, Any]:
+			return {
+				"id": self.id,
+				"userId": self.user_id,
+				"isVictory": self.is_victory,
+				"date": self.date.isoformat(),
+				"picture": self.picture,
+				"notes": self.notes,
+			}
+
+		@classmethod
+		def from_payload(cls, *, payload: Dict[str, Any], user_id: str, match_id: str) -> "Match":
+			date = _parse_datetime(payload.get("date"))
+			picture = _parse_picture(payload.get("picture"))
+			is_victory = _parse_bool(payload.get("isVictory"))
+
+			return cls(
+				id=match_id,
+				user_id=user_id,
+				is_victory=is_victory,
+				date=date,
+				picture=picture,
+				notes=_parse_optional_str(payload.get("notes")),
+			)
+
+		def update_from_payload(self, payload: Dict[str, Any]) -> None:
+			if "isVictory" in payload:
+				self.is_victory = _parse_bool(payload.get("isVictory"), default=self.is_victory)
+			if "date" in payload:
+				self.date = _parse_datetime(payload.get("date"))
+			if "picture" in payload:
+				self.picture = _parse_picture(payload.get("picture"))
+			if "notes" in payload:
+				self.notes = _parse_optional_str(payload.get("notes"))
+
+
 def _parse_birth_date(value: Any) -> dt.date:
 	if isinstance(value, dt.date):
 		return value
@@ -165,3 +214,42 @@ def _parse_int(value: Any, *, default: int = 0) -> int:
 		return int(value)
 	except (TypeError, ValueError):
 		return default
+
+
+def _parse_bool(value: Any, *, default: bool = False) -> bool:
+	if isinstance(value, bool):
+		return value
+	if isinstance(value, str):
+		if value.lower() in {"true", "1", "yes"}:
+			return True
+		if value.lower() in {"false", "0", "no"}:
+			return False
+	try:
+		return bool(int(value))
+	except Exception:
+		return default
+
+
+def _parse_datetime(value: Any) -> dt.datetime:
+	if isinstance(value, dt.datetime):
+		return value
+	if isinstance(value, str):
+		try:
+			return dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+		except ValueError:
+			pass
+	raise ValueError("date must be an ISO datetime string")
+
+
+def _parse_picture(value: Any) -> str:
+	if isinstance(value, str) and value.strip():
+		return value.strip()
+	raise ValueError("picture is required")
+
+
+def _parse_optional_str(value: Any) -> Optional[str]:
+	if value is None:
+		return None
+	if isinstance(value, str):
+		return value.strip() or None
+	return str(value)

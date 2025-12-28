@@ -6,7 +6,7 @@ from flask import Flask, abort, jsonify, request
 from firebase_admin import auth, credentials
 
 from database import db, init_db
-from models import UserProfile
+from models import Match, UserProfile
 
 
 def create_app() -> Flask:
@@ -111,6 +111,50 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(profile.to_dict())
 
+    # --- Matches ---
+    @app.get("/api/matches")
+    def get_my_matches():
+        uid, _ = _require_user()
+        matches = Match.query.filter_by(user_id=uid).all()
+        return jsonify([m.to_dict() for m in matches])
+
+    @app.get("/api/matches/user/<uid>")
+    def get_matches_for_user(uid: str):
+        requester_uid, _ = _require_user()
+        if uid != requester_uid:
+            abort(403, description="Cannot access other users' matches")
+        matches = Match.query.filter_by(user_id=uid).all()
+        return jsonify([m.to_dict() for m in matches])
+
+    @app.post("/api/matches")
+    def create_match():
+        uid, _ = _require_user()
+        payload = _get_payload()
+        match_id = str(payload.get("id") or _generate_id())
+
+        try:
+            match = Match.from_payload(payload=payload, user_id=uid, match_id=match_id)
+            db.session.add(match)
+            db.session.commit()
+        except ValueError as exc:
+            db.session.rollback()
+            abort(400, description=str(exc))
+
+        return jsonify(match.to_dict())
+
+    @app.delete("/api/matches/<match_id>")
+    def delete_match(match_id: str):
+        uid, _ = _require_user()
+        match = Match.query.get(match_id)
+        if not match:
+            abort(404, description="Match not found")
+        if match.user_id != uid:
+            abort(403, description="Cannot delete a match you do not own")
+
+        db.session.delete(match)
+        db.session.commit()
+        return jsonify({"deleted": match_id})
+
 
 def _require_user() -> Tuple[str, str]:
     auth_header = request.headers.get("Authorization", "")
@@ -135,6 +179,10 @@ def _get_payload() -> Dict[str, Any]:
     if not isinstance(payload, dict):
         abort(400, description="Payload must be a JSON object")
     return payload
+
+
+def _generate_id() -> str:
+    return os.urandom(12).hex()
 
 
 app = create_app()
