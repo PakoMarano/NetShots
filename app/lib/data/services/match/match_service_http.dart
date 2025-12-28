@@ -10,7 +10,7 @@ class MatchServiceHttp implements MatchServiceInterface {
 
   MatchServiceHttp(
     this._firebaseAuth, {
-    this.baseUrl = 'http://localhost:5000',
+    required this.baseUrl,
   });
 
   Future<String> _getIdToken() async {

@@ -46,7 +46,6 @@ class CreateProfileViewModel extends ChangeNotifier {
         profilePicture: null,
         pictures: [],
       );
-
       await _profileRepository.createProfile(profile);
       
       _isLoading = false;

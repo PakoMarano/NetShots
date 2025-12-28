@@ -11,7 +11,7 @@ import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/auth/auth_service_firebase.dart';
 import 'package:netshots/data/services/follow/follow_service_mock.dart';
 import 'package:netshots/data/services/image/image_storage_service_mock.dart';
-import 'package:netshots/data/services/match/match_service_mock.dart';
+import 'package:netshots/data/services/match/match_service_http.dart';
 import 'package:netshots/data/services/profile/profile_service_http.dart';
 import 'package:netshots/data/services/search/search_service_mock.dart';
 import 'package:netshots/ui/auth/login/login_viewmodel.dart';
@@ -36,6 +36,8 @@ import 'ui/auth/login/login_screen.dart';
 import 'ui/auth/register/register_screen.dart';
 import 'ui/home/home_screen.dart';
 
+const String kBackendBaseUrl = 'http://192.168.1.26:5000';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -47,9 +49,9 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final authService = AuthServiceFirebase(FirebaseAuth.instance);
   final authRepository = AuthRepository(authService);
-  final profileService = ProfileServiceHttp(FirebaseAuth.instance);
+  final profileService = ProfileServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final profileRepository = ProfileRepository(profileService);
-  final matchService = MatchServiceMock(prefs);
+  final matchService = MatchServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final matchRepository = MatchRepository(matchService, profileService);
   final imageStorageService = ImageStorageServiceMock();
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
