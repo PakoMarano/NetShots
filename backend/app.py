@@ -62,7 +62,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/api/profiles/me")
     def get_my_profile():
         uid, _ = _require_user()
-        profile = UserProfile.query.get(uid)
+        profile = db.session.get(UserProfile, uid)
         if not profile:
             abort(404, description="Profile not found")
         return jsonify(profile.to_dict())
@@ -70,7 +70,7 @@ def register_routes(app: Flask) -> None:
     @app.get("/api/profiles/<uid>")
     def get_profile(uid: str):
         _require_user()  # ensure token is valid even for public fetch
-        profile = UserProfile.query.get(uid)
+        profile = db.session.get(UserProfile, uid)
         if not profile:
             abort(404, description="Profile not found")
         return jsonify(profile.to_dict())
@@ -79,7 +79,7 @@ def register_routes(app: Flask) -> None:
     def create_or_update_profile():
         uid, email = _require_user()
         payload = _get_payload()
-        profile = UserProfile.query.get(uid)
+        profile = db.session.get(UserProfile, uid)
 
         try:
             if profile:
@@ -98,7 +98,7 @@ def register_routes(app: Flask) -> None:
     def update_my_profile():
         uid, email = _require_user()
         payload = _get_payload()
-        profile = UserProfile.query.get(uid)
+        profile = db.session.get(UserProfile, uid)
         if not profile:
             abort(404, description="Profile not found")
 
@@ -145,7 +145,7 @@ def register_routes(app: Flask) -> None:
     @app.delete("/api/matches/<match_id>")
     def delete_match(match_id: str):
         uid, _ = _require_user()
-        match = Match.query.get(match_id)
+        match = db.session.get(Match, match_id)
         if not match:
             abort(404, description="Match not found")
         if match.user_id != uid:
