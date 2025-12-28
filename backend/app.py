@@ -111,6 +111,21 @@ def register_routes(app: Flask) -> None:
 
         return jsonify(profile.to_dict())
 
+    @app.delete("/api/profiles/me")
+    def delete_my_profile():
+        uid, _ = _require_user()
+        profile = db.session.get(UserProfile, uid)
+        if not profile:
+            abort(404, description="Profile not found")
+
+        # Delete all associated matches first
+        Match.query.filter_by(user_id=uid).delete()
+        
+        # Delete the profile
+        db.session.delete(profile)
+        db.session.commit()
+        return jsonify({"deleted": uid}), 200
+
     # --- Matches ---
     @app.get("/api/matches")
     def get_my_matches():
