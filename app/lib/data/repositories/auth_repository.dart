@@ -28,4 +28,9 @@ class AuthRepository {
   String? getCurrentUserEmail() {
     return _authService.getCurrentUserEmail();
   }
+
+  /// Stream that emits `true` when signed in and `false` when signed out.
+  Stream<bool> authStateChanges() {
+    return _authService.authStateChanges();
+  }
 }

@@ -1,10 +1,16 @@
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:netshots/data/services/auth/auth_service_interface.dart';
 
 class AuthServiceMock implements AuthServiceInterface {
   final SharedPreferences _sharedPreferences;
+  final StreamController<bool> _authStateController = StreamController<bool>.broadcast();
 
-  AuthServiceMock(this._sharedPreferences);
+  AuthServiceMock(this._sharedPreferences) {
+    // Emit initial state based on stored token
+    final isLoggedIn = _sharedPreferences.containsKey('auth_token');
+    _authStateController.add(isLoggedIn);
+  }
 
   @override
   Future<void> login(String email, String password) async {
@@ -14,6 +20,9 @@ class AuthServiceMock implements AuthServiceInterface {
     // Store a mock token and email in shared preferences
     await _sharedPreferences.setString('auth_token', 'mockToken');
     await _sharedPreferences.setString('user_email', email);
+
+    // Emit logged-in state
+    _authStateController.add(true);
   }
 
   @override
@@ -24,6 +33,9 @@ class AuthServiceMock implements AuthServiceInterface {
     // Clear the mock token and email from shared preferences
     await _sharedPreferences.remove('auth_token');
     await _sharedPreferences.remove('user_email');
+
+    // Emit logged-out state
+    _authStateController.add(false);
   }
 
   @override
@@ -34,6 +46,9 @@ class AuthServiceMock implements AuthServiceInterface {
     // Store a mock token and email in shared preferences
     await _sharedPreferences.setString('auth_token', 'mockToken');
     await _sharedPreferences.setString('user_email', email);
+
+    // Emit logged-in state
+    _authStateController.add(true);
   }
 
   @override
@@ -56,5 +71,10 @@ class AuthServiceMock implements AuthServiceInterface {
   String? getCurrentUserEmail() {
     // Get the stored email for the current user
     return _sharedPreferences.getString('user_email');
+  }
+
+  @override
+  Stream<bool> authStateChanges() {
+    return _authStateController.stream;
   }
 }

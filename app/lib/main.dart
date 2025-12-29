@@ -90,23 +90,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: _determineInitialRoute(),
-      builder: (context, snapshot) {
-        // Show a loading indicator while determining the initial route
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          );
-        }
-
-        final initialRoute = snapshot.data ?? '/login';
-
-        return MultiProvider(
+    return MultiProvider(
           providers: [
             // Repository providers 
             Provider<AuthRepository>.value(value: authRepository),
@@ -177,7 +161,7 @@ class MyApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            initialRoute: initialRoute,
+            home: const AuthGate(),
             routes: {
               '/home': (context) => const HomeScreen(),
               '/login': (context) => const LoginScreen(),
@@ -186,19 +170,48 @@ class MyApp extends StatelessWidget {
             },
           ),
         );
+  }
+}
+
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final authRepository = Provider.of<AuthRepository>(context, listen: false);
+    final profileRepository = Provider.of<ProfileRepository>(context, listen: false);
+
+    return StreamBuilder<bool>(
+      stream: authRepository.authStateChanges(),
+      builder: (context, authSnapshot) {
+        if (authSnapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final isLoggedIn = authSnapshot.data == true;
+
+        if (!isLoggedIn) {
+          return const LoginScreen();
+        }
+
+        return FutureBuilder(
+          future: profileRepository.getProfile(),
+          builder: (context, profileSnapshot) {
+            if (profileSnapshot.connectionState == ConnectionState.waiting) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final profile = profileSnapshot.data;
+            if (profile == null) {
+              return const CreateProfileScreen();
+            }
+            return const HomeScreen();
+          },
+        );
       },
     );
-  }
-
-  Future<String> _determineInitialRoute() async {
-    final isLoggedIn = await authRepository.isLoggedIn();
-    if (!isLoggedIn) {
-      return '/login';
-    }
-    final profile = await profileRepository.getProfile();
-    if (profile == null) {
-      return '/create-profile';
-    }
-    return '/home';
   }
 }

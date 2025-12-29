@@ -50,6 +50,11 @@ class AuthServiceFirebase implements AuthServiceInterface {
     return _firebaseAuth.currentUser?.email;
   }
 
+  @override
+  Stream<bool> authStateChanges() {
+    return _firebaseAuth.authStateChanges().map((user) => user != null);
+  }
+
   String _getAuthErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
       case 'user-not-found':

@@ -5,4 +5,7 @@ abstract class AuthServiceInterface {
   Future<bool> isLoggedIn();
   String? getCurrentUserId();
   String? getCurrentUserEmail();
+  /// Emits `true` when a user is signed in, `false` otherwise.
+  /// Should reflect real-time auth state changes.
+  Stream<bool> authStateChanges();
 }
