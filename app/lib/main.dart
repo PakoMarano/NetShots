@@ -13,7 +13,7 @@ import 'package:netshots/data/services/follow/follow_service_mock.dart';
 import 'package:netshots/data/services/image/image_storage_service_mock.dart';
 import 'package:netshots/data/services/match/match_service_http.dart';
 import 'package:netshots/data/services/profile/profile_service_http.dart';
-import 'package:netshots/data/services/search/search_service_mock.dart';
+import 'package:netshots/data/services/search/search_service_http.dart';
 import 'package:netshots/ui/auth/login/login_viewmodel.dart';
 import 'package:netshots/ui/auth/logout/logout_viewmodel.dart';
 import 'package:netshots/ui/auth/register/register_viewmodel.dart';
@@ -55,7 +55,7 @@ void main() async {
   final matchRepository = MatchRepository(matchService, profileService);
   final imageStorageService = ImageStorageServiceMock();
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
-  final searchService = MockSearchService(prefs);
+  final searchService = SearchServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final searchRepository = SearchRepository(searchService);
   final followService = FollowServiceMock(prefs);
   final followRepository = FollowRepository(followService);

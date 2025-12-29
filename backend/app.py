@@ -126,6 +126,36 @@ def register_routes(app: Flask) -> None:
         db.session.commit()
         return jsonify({"deleted": uid}), 200
 
+    # --- Search ---
+    @app.get("/api/search/users")
+    def search_users():
+        uid, _ = _require_user()
+        query = request.args.get("q", "").strip()
+        
+        if not query:
+            return jsonify([])
+        
+        # Case-insensitive partial match on first name or last name
+        search_pattern = f"%{query}%"
+        profiles = UserProfile.query.filter(
+            db.or_(
+                UserProfile.first_name.ilike(search_pattern),
+                UserProfile.last_name.ilike(search_pattern)
+            ),
+            UserProfile.uid != uid  # Exclude current user
+        ).all()
+        
+        # Return simplified user info for search results
+        results = []
+        for profile in profiles:
+            results.append({
+                "userId": profile.uid,
+                "displayName": f"{profile.first_name} {profile.last_name}",
+                "profilePicture": profile.profile_picture
+            })
+        
+        return jsonify(results)
+
     # --- Matches ---
     @app.get("/api/matches")
     def get_my_matches():
