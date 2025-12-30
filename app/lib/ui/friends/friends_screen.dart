@@ -235,7 +235,7 @@ class _FeedItemCard extends StatelessWidget {
                 leading: CircleAvatar(
                   backgroundColor: Colors.grey.shade300,
                   backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
-                      ? NetworkImage(user.profilePicture!)
+                      ? _getImageProvider(user.profilePicture!)
                       : null,
                   child: user.profilePicture == null || user.profilePicture!.isEmpty
                       ? Icon(Icons.person, color: Colors.grey.shade600)

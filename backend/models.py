@@ -46,7 +46,7 @@ class UserProfile(db.Model):
 	last_name = db.Column(db.String(120), nullable=False)
 	birth_date = db.Column(db.Date, nullable=False)
 	gender = db.Column(db.Enum(Gender), nullable=False)
-	profile_picture = db.Column(db.String(500))
+	profile_picture = db.Column(db.String(1024))
 	victories = db.Column(db.Integer, nullable=False, default=0)
 	losses = db.Column(db.Integer, nullable=False, default=0)
 	pictures = db.Column(StringList, nullable=False, default=list)
@@ -141,7 +141,7 @@ class Match(db.Model):
 	user_id = db.Column(db.String(128), db.ForeignKey("user_profiles.uid"), nullable=False, index=True)
 	is_victory = db.Column(db.Boolean, nullable=False, default=False)
 	date = db.Column(db.DateTime, nullable=False)
-	picture = db.Column(db.String(500), nullable=False)
+	picture = db.Column(db.String(1024), nullable=False)
 	notes = db.Column(db.Text)
 	created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 

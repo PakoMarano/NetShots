@@ -15,7 +15,7 @@ class ImageStorageServiceMock implements ImageStorageServiceInterface {
 
       // Create the directory for profile images if it doesn't exist
       final Directory profileImagesDir = Directory(path.join(appDocDir.path, _profileImagesFolder));
-      if (!await profileImagesDir.exists()) {
+      if (!await profileImagesDir.exists()) { 
         await profileImagesDir.create(recursive: true);
       }
 
