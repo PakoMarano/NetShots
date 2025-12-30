@@ -5,6 +5,7 @@ import 'package:netshots/ui/user_search/user_search_bar.dart';
 import 'package:netshots/ui/user_search/user_search_sheet.dart';
 import 'package:netshots/ui/profile/other_user_profile/other_user_profile_screen.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 import 'friends_viewmodel.dart';
 
 class FriendsScreen extends StatefulWidget {
@@ -205,100 +206,155 @@ class _FeedItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final match = feedItem.match;
     final user = feedItem.user;
-    final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+    final dateFormat = DateFormat('dd/MM/yyyy');
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // User info header
-          ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Colors.grey.shade300,
-              backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
-                  ? NetworkImage(user.profilePicture!)
-                  : null,
-              child: user.profilePicture == null || user.profilePicture!.isEmpty
-                  ? Icon(Icons.person, color: Colors.grey.shade600)
-                  : null,
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => OtherUserProfileScreen(
+              userId: user.userId,
+              displayName: user.displayName,
             ),
-            title: Text(
-              user.displayName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(dateFormat.format(match.date)),
-            trailing: Icon(
-              match.isVictory ? Icons.emoji_events : Icons.sentiment_neutral,
-              color: match.isVictory ? Colors.amber : Colors.grey,
-            ),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => OtherUserProfileScreen(
-                    userId: user.userId,
-                    displayName: user.displayName,
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        child: Card(
+          elevation: isDark ? 3 : 1,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          color: theme.colorScheme.surface,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // User info header
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.grey.shade300,
+                  backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
+                      ? NetworkImage(user.profilePicture!)
+                      : null,
+                  child: user.profilePicture == null || user.profilePicture!.isEmpty
+                      ? Icon(Icons.person, color: Colors.grey.shade600)
+                      : null,
+                ),
+                title: Text(
+                  user.displayName,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+              // Match image
+              if (match.picture.isNotEmpty)
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(15),
+                    bottomRight: Radius.circular(15),
+                  ),
+                  child: Container(
+                    height: 320,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: match.isVictory ? Colors.green : Colors.red,
+                      ),
+                      image: DecorationImage(
+                        image: _getImageProvider(match.picture),
+                        fit: BoxFit.cover,
+                      ),
+                      boxShadow: isDark
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              )
+                            ]
+                          : null,
+                    ),
+                    child: Stack(
+                      children: [
+                        // Victory/loss badge (top-left)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: match.isVictory ? Colors.green : Colors.red,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              match.isVictory ? Icons.emoji_events : Icons.close,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                        // Date label (bottom-left)
+                        Positioned(
+                          bottom: 8,
+                          left: 8,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              dateFormat.format(match.date),
+                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              );
-            },
-          ),
-          // Match image
-          if (match.picture.isNotEmpty)
-            GestureDetector(
-              onTap: () {
-                // Could open full screen image viewer
-              },
-              child: Image.network(
-                match.picture,
-                width: double.infinity,
-                height: 300,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 300,
-                    color: Colors.grey.shade300,
-                    child: const Center(
-                      child: Icon(Icons.broken_image, size: 64),
-                    ),
-                  );
-                },
-              ),
-            ),
-          // Match notes
-          if (match.notes != null && match.notes!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Text(
-                match.notes!,
-                style: const TextStyle(fontSize: 14),
-              ),
-            ),
-          // Result indicator
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-            child: Row(
-              children: [
+              // Match notes (if available)
+              if (match.notes != null && match.notes!.isNotEmpty)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: match.isVictory ? Colors.green.shade100 : Colors.red.shade100,
-                    borderRadius: BorderRadius.circular(12),
+                    color: isDark ? Colors.white.withValues(alpha: 0.03) : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(15),
+                      bottomRight: Radius.circular(15),
+                    ),
                   ),
                   child: Text(
-                    match.isVictory ? 'Vittoria' : 'Sconfitta',
+                    match.notes!,
                     style: TextStyle(
-                      color: match.isVictory ? Colors.green.shade800 : Colors.red.shade800,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: 14,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
                     ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ],
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  /// Helper method to get the appropriate ImageProvider based on the image path
+  ImageProvider _getImageProvider(String imagePath) {
+    // Check if it's a network URL
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return NetworkImage(imagePath);
+    }
+    // Otherwise, it's a local file
+    return FileImage(File(imagePath));
   }
 }
