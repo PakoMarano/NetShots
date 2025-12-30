@@ -86,6 +86,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
     });
 
     if (success) {
+      if (!mounted) return;
       // Refresh profile gallery so the new picture appears when the user visits the profile
       try {
         final profileVm = Provider.of<ProfileViewModel>(context, listen: false);
@@ -93,14 +94,18 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       } catch (_) {
         // ignore if profile VM not available
       }
+      
+      if (!mounted) return;
       // Navigate to profile tab (HomeScreen will animate PageView when HomeViewModel index changes)
       try {
         final homeVm = Provider.of<HomeViewModel>(context, listen: false);
-  homeVm.setCurrentIndex(1);
+        homeVm.setCurrentIndex(1);
       } catch (_) {}
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Partita aggiunta')));
 
+      if (!mounted) return;
       // Only pop if this route was pushed. If this screen is inside a PageView (no
       // navigator entry), popping the navigator can close the app or hide UI — avoid that.
       if (Navigator.of(context).canPop()) {
@@ -116,6 +121,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
         });
       }
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Errore nel salvataggio')));
     }
   }
