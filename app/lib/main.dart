@@ -9,7 +9,7 @@ import 'package:netshots/data/repositories/match_repository.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/auth/auth_service_firebase.dart';
-import 'package:netshots/data/services/follow/follow_service_mock.dart';
+import 'package:netshots/data/services/follow/follow_service_http.dart';
 import 'package:netshots/data/services/image/image_storage_service_mock.dart';
 import 'package:netshots/data/services/match/match_service_http.dart';
 import 'package:netshots/data/services/profile/profile_service_http.dart';
@@ -29,7 +29,6 @@ import 'package:netshots/ui/profile/profile_screen/profile_viewmodel.dart';
 import 'package:netshots/ui/settings/settings_viewmodel.dart';
 import 'package:netshots/ui/user_search/user_search_viewmodel.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'firebase_options.dart';
 import 'ui/auth/login/login_screen.dart';
@@ -45,8 +44,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize repositories
-  final prefs = await SharedPreferences.getInstance();
+  // Initialize repositories and services
   final authService = AuthServiceFirebase(FirebaseAuth.instance);
   final authRepository = AuthRepository(authService);
   final profileService = ProfileServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
@@ -57,7 +55,7 @@ void main() async {
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
   final searchService = SearchServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final searchRepository = SearchRepository(searchService);
-  final followService = FollowServiceMock(prefs);
+  final followService = FollowServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final followRepository = FollowRepository(followService);
 
   runApp(MyApp(

@@ -6,7 +6,7 @@ from flask import Flask, abort, jsonify, request
 from firebase_admin import auth, credentials
 
 from database import db, init_db
-from models import Match, UserProfile
+from models import Follow, Match, UserProfile
 
 
 def create_app() -> Flask:
@@ -155,6 +155,71 @@ def register_routes(app: Flask) -> None:
             })
         
         return jsonify(results)
+
+    # --- Follow ---
+    @app.post("/api/follow/<target_user_id>")
+    def follow_user(target_user_id: str):
+        uid, _ = _require_user()
+        
+        if uid == target_user_id:
+            abort(400, description="Cannot follow yourself")
+        
+        # Check if target user exists
+        target_profile = db.session.get(UserProfile, target_user_id)
+        if not target_profile:
+            abort(404, description="Target user not found")
+        
+        # Check if already following
+        existing = db.session.get(Follow, (uid, target_user_id))
+        if existing:
+            return jsonify({"status": "already following"}), 200
+        
+        # Create follow relationship
+        follow = Follow(follower_id=uid, following_id=target_user_id)
+        db.session.add(follow)
+        db.session.commit()
+        
+        return jsonify({"status": "success"}), 201
+
+    @app.delete("/api/follow/<target_user_id>")
+    def unfollow_user(target_user_id: str):
+        uid, _ = _require_user()
+        
+        follow = db.session.get(Follow, (uid, target_user_id))
+        if not follow:
+            abort(404, description="Not following this user")
+        
+        db.session.delete(follow)
+        db.session.commit()
+        
+        return jsonify({"status": "success"}), 200
+
+    @app.get("/api/follow/<target_user_id>/is-following")
+    def is_following(target_user_id: str):
+        uid, _ = _require_user()
+        
+        follow = db.session.get(Follow, (uid, target_user_id))
+        return jsonify({"isFollowing": follow is not None})
+
+    @app.get("/api/follow/<user_id>/followers")
+    def get_followers(user_id: str):
+        _require_user()
+        
+        # Get all users who follow this user
+        followers = Follow.query.filter_by(following_id=user_id).all()
+        follower_ids = [f.follower_id for f in followers]
+        
+        return jsonify(follower_ids)
+
+    @app.get("/api/follow/<user_id>/following")
+    def get_following(user_id: str):
+        _require_user()
+        
+        # Get all users this user follows
+        following = Follow.query.filter_by(follower_id=user_id).all()
+        following_ids = [f.following_id for f in following]
+        
+        return jsonify(following_ids)
 
     # --- Matches ---
     @app.get("/api/matches")

@@ -122,6 +122,18 @@ class UserProfile(db.Model):
 			self.pictures = _parse_pictures(payload.get("pictures"))
 
 
+class Follow(db.Model):
+	__tablename__ = "follows"
+
+	follower_id = db.Column(db.String(128), db.ForeignKey("user_profiles.uid"), primary_key=True)
+	following_id = db.Column(db.String(128), db.ForeignKey("user_profiles.uid"), primary_key=True)
+	created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+
+	# Relationships
+	follower = db.relationship("UserProfile", foreign_keys=[follower_id], backref=db.backref("following", lazy=True))
+	following = db.relationship("UserProfile", foreign_keys=[following_id], backref=db.backref("followers", lazy=True))
+
+
 class Match(db.Model):
 	__tablename__ = "matches"
 
