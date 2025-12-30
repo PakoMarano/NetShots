@@ -8,12 +8,12 @@ class OtherUserProfileViewModel extends ChangeNotifier {
   final ProfileRepository _profileRepository;
   final MatchRepository _matchRepository;
   final String userId;
+  final Map<String, List<MatchModel>> _pictureMatches = {};
 
   OtherUserProfileViewModel(this._profileRepository, this._matchRepository, this.userId);
 
   UserProfile? _userProfile;
   List<String> _pictures = [];
-  Map<String, List<MatchModel>> _pictureMatches = {};
   bool _isLoading = false;
   String? _errorMessage;
 

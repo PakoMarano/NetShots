@@ -3,12 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:netshots/data/repositories/auth_repository.dart';
+import 'package:netshots/data/repositories/feed_repository.dart';
 import 'package:netshots/data/repositories/follow_repository.dart';
 import 'package:netshots/data/repositories/image_storage_repository.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/auth/auth_service_firebase.dart';
+import 'package:netshots/data/services/feed/feed_service_http.dart';
 import 'package:netshots/data/services/follow/follow_service_http.dart';
 import 'package:netshots/data/services/image/image_storage_service_mock.dart';
 import 'package:netshots/data/services/match/match_service_http.dart';
@@ -57,6 +59,8 @@ void main() async {
   final searchRepository = SearchRepository(searchService);
   final followService = FollowServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final followRepository = FollowRepository(followService);
+  final feedService = FeedServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
+  final feedRepository = FeedRepository(feedService);
 
   runApp(MyApp(
     authRepository: authRepository, 
@@ -65,6 +69,7 @@ void main() async {
     matchRepository: matchRepository,
     searchRepository: searchRepository,
     followRepository: followRepository,
+    feedRepository: feedRepository,
   ));
 }
 
@@ -75,6 +80,7 @@ class MyApp extends StatelessWidget {
   final MatchRepository matchRepository;
   final SearchRepository searchRepository;
   final FollowRepository followRepository;
+  final FeedRepository feedRepository;
 
   const MyApp({
     super.key,
@@ -84,6 +90,7 @@ class MyApp extends StatelessWidget {
     required this.matchRepository,
     required this.searchRepository,
     required this.followRepository,
+    required this.feedRepository,
   });
 
   @override
@@ -97,6 +104,7 @@ class MyApp extends StatelessWidget {
             Provider<MatchRepository>.value(value: matchRepository),
             Provider<SearchRepository>.value(value: searchRepository),
             Provider<FollowRepository>.value(value: followRepository),
+            Provider<FeedRepository>.value(value: feedRepository),
             // ViewModel providers
             ChangeNotifierProvider<HomeViewModel>(
               create: (_) => HomeViewModel(),
@@ -135,7 +143,7 @@ class MyApp extends StatelessWidget {
               create: (_) => DeleteProfileViewModel(profileRepository),
             ),
             ChangeNotifierProvider<FriendsViewModel>(
-              create: (_) => FriendsViewModel(),
+              create: (context) => FriendsViewModel(Provider.of<FeedRepository>(context, listen: false)),
             ),
             ChangeNotifierProvider<UserSearchViewModel>(
               create: (_) => UserSearchViewModel(searchRepository),

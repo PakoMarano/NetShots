@@ -221,6 +221,48 @@ def register_routes(app: Flask) -> None:
         
         return jsonify(following_ids)
 
+    # --- Feed ---
+    @app.get("/api/feed")
+    def get_feed():
+        uid, _ = _require_user()
+        
+        # Get limit and offset for pagination
+        limit = request.args.get("limit", default=50, type=int)
+        offset = request.args.get("offset", default=0, type=int)
+        
+        # Find all users the current user follows
+        following = Follow.query.filter_by(follower_id=uid).all()
+        following_ids = [f.following_id for f in following]
+        
+        if not following_ids:
+            return jsonify([])
+        
+        # Get all matches from followed users, ordered by date (most recent first)
+        matches = Match.query.filter(
+            Match.user_id.in_(following_ids)
+        ).order_by(
+            Match.date.desc()
+        ).limit(limit).offset(offset).all()
+        
+        # Enrich matches with user profile info
+        feed_items = []
+        for match in matches:
+            # Get the user profile for this match
+            profile = db.session.get(UserProfile, match.user_id)
+            if not profile:
+                continue  # Skip if profile not found (shouldn't happen)
+            
+            feed_items.append({
+                "match": match.to_dict(),
+                "user": {
+                    "userId": profile.uid,
+                    "displayName": f"{profile.first_name} {profile.last_name}",
+                    "profilePicture": profile.profile_picture
+                }
+            })
+        
+        return jsonify(feed_items)
+
     # --- Matches ---
     @app.get("/api/matches")
     def get_my_matches():
