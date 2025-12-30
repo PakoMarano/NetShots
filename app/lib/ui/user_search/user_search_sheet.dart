@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'user_search_viewmodel.dart';
 import 'user_search_bar.dart';
 import 'package:netshots/ui/follow/follow_button.dart';
+import 'package:netshots/ui/profile/other_user_profile/other_user_profile_screen.dart';
 
 class UserSearchScreen extends StatelessWidget {
   final bool autoFocus;
@@ -90,7 +91,14 @@ class UserSearchScreen extends StatelessWidget {
                         subtitle: Text('@${user.userId}'),
                         trailing: FollowButton(targetId: user.userId, displayName: user.displayName),
                         onTap: () {
-                          // TODO: Navigate to user profile
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => OtherUserProfileScreen(
+                                userId: user.userId,
+                                displayName: user.displayName,
+                              ),
+                            ),
+                          );
                         },
                       );
                     },

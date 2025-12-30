@@ -88,6 +88,36 @@ class ProfileServiceHttp implements ProfileServiceInterface {
   }
 
   @override
+  Future<Map<String, dynamic>?> getProfileByUserId(String userId) async {
+    try {
+      final headers = await _getHeaders();
+      final url = Uri.parse('$baseUrl/api/profiles/$userId');
+
+      final response = await http.get(
+        url,
+        headers: headers,
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw Exception('Request timeout'),
+      );
+
+      if (response.statusCode == 200) {
+        final profileData = jsonDecode(response.body) as Map<String, dynamic>;
+        return profileData;
+      }
+
+      if (response.statusCode == 404) {
+        return null;
+      }
+
+      final errorBody = jsonDecode(response.body);
+      throw Exception(errorBody['error'] ?? 'Failed to fetch profile');
+    } catch (e) {
+      throw Exception('Error fetching profile: $e');
+    }
+  }
+
+  @override
   Future<void> updateProfile(Map<String, dynamic> profileData) async {
     try {
       final headers = await _getHeaders();

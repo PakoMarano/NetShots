@@ -16,6 +16,12 @@ class ProfileRepository {
     return UserProfile.fromMap(profileMap);
   }
 
+  Future<UserProfile?> getProfileByUserId(String userId) async {
+    final profileMap = await _profileService.getProfileByUserId(userId);
+    if (profileMap == null) return null;
+    return UserProfile.fromMap(profileMap);
+  }
+
   Future<void> updateProfile(UserProfile profile) async {
     await _profileService.updateProfile(profile.toMap());
   }

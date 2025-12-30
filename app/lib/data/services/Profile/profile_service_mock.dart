@@ -47,6 +47,22 @@ class ProfileServiceMock implements ProfileServiceInterface {
   }
 
   @override
+  Future<Map<String, dynamic>?> getProfileByUserId(String userId) async {
+    // Simulate a network call
+    await Future.delayed(Duration(seconds: 1));
+
+    // Mock implementation: for demo purposes, return a mock profile
+    // In a real scenario, this would fetch from a backend database
+    return {
+      'userId': userId,
+      'displayName': 'Mock User',
+      'bio': 'This is a mock profile for testing purposes',
+      'profilePicture': '',
+      'gallery': [],
+    };
+  }
+
+  @override
   Future<void> updateProfile(Map<String, dynamic> profileData) async {
     // Simulate a network call
     await Future.delayed(Duration(seconds: 1));
