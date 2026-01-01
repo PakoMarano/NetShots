@@ -33,8 +33,7 @@ class OtherUserProfileViewModel extends ChangeNotifier {
       _userProfile = await _profileRepository.getProfileByUserId(userId);
       
       if (_userProfile != null) {
-        // Build the pictures array from profile
-        _buildPictures();
+        await _loadPicturesFromMatches();
       }
     } catch (e) {
       _errorMessage = 'Impossibile caricare il profilo';
@@ -45,14 +44,32 @@ class OtherUserProfileViewModel extends ChangeNotifier {
     }
   }
 
-  void _buildPictures() {
-    if (_userProfile == null) return;
-    
-    _pictures = [];
-    if (_userProfile!.profilePicture != null && _userProfile!.profilePicture!.isNotEmpty) {
-      _pictures.add(_userProfile!.profilePicture!);
+  Future<void> _loadPicturesFromMatches() async {
+    // Prefer the gallery derived from matches to align with the feed
+    try {
+      final matchPictures = await _matchRepository.getGalleryFromMatches(userId);
+      if (matchPictures.isNotEmpty) {
+        // Deduplicate while preserving order and drop empties/profile picture
+        final seen = <String>{};
+        _pictures = matchPictures
+            .where((p) => p.isNotEmpty)
+            .where((p) => p != _userProfile?.profilePicture)
+            .where((p) => seen.add(p))
+            .toList();
+        return;
+      }
+    } catch (_) {
+      // best-effort: fall back to profile pictures below
     }
-    _pictures.addAll(_userProfile!.pictures);
+
+    // Fallback: use stored profile pictures if available, but skip the profile picture itself
+    final profilePics = _userProfile?.pictures ?? [];
+    final seen = <String>{};
+    _pictures = profilePics
+        .where((p) => p.isNotEmpty)
+        .where((p) => p != _userProfile?.profilePicture)
+        .where((p) => seen.add(p))
+        .toList();
   }
 
   Future<void> loadMatchesForPhoto(int index) async {

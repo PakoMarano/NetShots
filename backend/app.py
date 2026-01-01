@@ -272,9 +272,7 @@ def register_routes(app: Flask) -> None:
 
     @app.get("/api/matches/user/<uid>")
     def get_matches_for_user(uid: str):
-        requester_uid, _ = _require_user()
-        if uid != requester_uid:
-            abort(403, description="Cannot access other users' matches")
+        _require_user()  # any authenticated user can view other users' matches
         matches = Match.query.filter_by(user_id=uid).all()
         return jsonify([m.to_dict() for m in matches])
 
