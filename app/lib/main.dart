@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:netshots/data/repositories/auth_repository.dart';
@@ -12,7 +13,7 @@ import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/auth/auth_service_firebase.dart';
 import 'package:netshots/data/services/feed/feed_service_http.dart';
 import 'package:netshots/data/services/follow/follow_service_http.dart';
-import 'package:netshots/data/services/image/image_storage_service_mock.dart';
+import 'package:netshots/data/services/image/image_storage_service_firebase.dart';
 import 'package:netshots/data/services/match/match_service_http.dart';
 import 'package:netshots/data/services/profile/profile_service_http.dart';
 import 'package:netshots/data/services/search/search_service_http.dart';
@@ -53,7 +54,7 @@ void main() async {
   final profileRepository = ProfileRepository(profileService);
   final matchService = MatchServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final matchRepository = MatchRepository(matchService, profileService);
-  final imageStorageService = ImageStorageServiceMock();
+  final imageStorageService = ImageStorageServiceFirebase(FirebaseStorage.instance);
   final imageStorageRepository = ImageStorageRepository(imageStorageService);
   final searchService = SearchServiceHttp(FirebaseAuth.instance, baseUrl: kBackendBaseUrl);
   final searchRepository = SearchRepository(searchService);
