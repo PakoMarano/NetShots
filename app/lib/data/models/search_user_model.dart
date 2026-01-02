@@ -3,7 +3,11 @@ class SearchUser {
   final String displayName;
   final String? profilePicture;
 
-  SearchUser({required this.userId, required this.displayName, this.profilePicture});
+  SearchUser({
+    required this.userId, 
+    required this.displayName, 
+    this.profilePicture,
+    });
 
   Map<String, dynamic> toMap() => {
         'userId': userId,

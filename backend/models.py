@@ -3,7 +3,7 @@ import enum
 import json
 from typing import Any, Dict, Iterable, List, Optional
 
-from sqlalchemy import Text
+from sqlalchemy import Float, Text
 from sqlalchemy.types import TypeDecorator
 
 from database import db
@@ -143,6 +143,8 @@ class Match(db.Model):
 	date = db.Column(db.DateTime, nullable=False)
 	picture = db.Column(db.String(1024), nullable=False)
 	notes = db.Column(db.Text)
+	latitude = db.Column(Float)
+	longitude = db.Column(Float)
 	created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
 	user = db.relationship("UserProfile", backref=db.backref("matches", lazy=True))
@@ -155,6 +157,8 @@ class Match(db.Model):
 			"date": self.date.isoformat(),
 			"picture": self.picture,
 			"notes": self.notes,
+			"latitude": self.latitude,
+			"longitude": self.longitude,
 		}
 
 	@classmethod
@@ -162,6 +166,8 @@ class Match(db.Model):
 		date = _parse_datetime(payload.get("date"))
 		picture = _parse_picture(payload.get("picture"))
 		is_victory = _parse_bool(payload.get("isVictory"))
+		latitude = _parse_optional_float(payload.get("latitude"))
+		longitude = _parse_optional_float(payload.get("longitude"))
 
 		return cls(
 			id=match_id,
@@ -170,6 +176,8 @@ class Match(db.Model):
 			date=date,
 			picture=picture,
 			notes=_parse_optional_str(payload.get("notes")),
+			latitude=latitude,
+			longitude=longitude,
 		)
 
 	def update_from_payload(self, payload: Dict[str, Any]) -> None:
@@ -181,6 +189,10 @@ class Match(db.Model):
 			self.picture = _parse_picture(payload.get("picture"))
 		if "notes" in payload:
 			self.notes = _parse_optional_str(payload.get("notes"))
+		if "latitude" in payload:
+			self.latitude = _parse_optional_float(payload.get("latitude"))
+		if "longitude" in payload:
+			self.longitude = _parse_optional_float(payload.get("longitude"))
 
 
 def _parse_birth_date(value: Any) -> dt.date:
@@ -265,3 +277,12 @@ def _parse_optional_str(value: Any) -> Optional[str]:
 	if isinstance(value, str):
 		return value.strip() or None
 	return str(value)
+
+
+def _parse_optional_float(value: Any) -> Optional[float]:
+	if value is None:
+		return None
+	try:
+		return float(value)
+	except (TypeError, ValueError):
+		return None

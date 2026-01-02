@@ -5,6 +5,8 @@ class MatchModel {
   final DateTime date;
   final String picture; // non-nullable: picture is required
   final String? notes;
+  final double? latitude;
+  final double? longitude;
 
   MatchModel({
     required this.id,
@@ -13,6 +15,8 @@ class MatchModel {
     required this.date,
     required this.picture,
     this.notes,
+    this.latitude,
+    this.longitude,
   });
 
   Map<String, dynamic> toMap() {
@@ -23,6 +27,8 @@ class MatchModel {
       'date': date.toIso8601String(),
       'picture': picture,
       'notes': notes,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 
@@ -40,6 +46,8 @@ class MatchModel {
       // but the UI should ensure a non-empty picture is always provided when creating a match.
       picture: (map['picture'] is String) ? (map['picture'] as String) : '',
       notes: map['notes'],
+      latitude: _toDouble(map['latitude']),
+      longitude: _toDouble(map['longitude']),
     );
   }
 
@@ -50,6 +58,8 @@ class MatchModel {
     DateTime? date,
     String? picture,
     String? notes,
+    double? latitude,
+    double? longitude,
   }) {
     return MatchModel(
       id: id ?? this.id,
@@ -58,11 +68,19 @@ class MatchModel {
       date: date ?? this.date,
       picture: picture ?? this.picture,
       notes: notes ?? this.notes,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 
   @override
   String toString() {
-    return 'MatchModel(id: $id, userId: $userId, isVictory: $isVictory, date: $date, picture: $picture)';
+    return 'MatchModel(id: $id, userId: $userId, isVictory: $isVictory, date: $date, picture: $picture, lat: $latitude, lng: $longitude)';
+  }
+
+  static double? _toDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString());
   }
 }

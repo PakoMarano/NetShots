@@ -52,5 +52,8 @@
 		<string>Questa app ha bisogno di accedere alla fotocamera per scattare foto del profilo.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Questa app ha bisogno di accedere alla galleria per selezionare foto del profilo.</string>
+		<!-- Location permission for match geotagging -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Usiamo la tua posizione per associare dove hai giocato la partita.</string>
 	</dict>
 </plist>
