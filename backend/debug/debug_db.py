@@ -58,6 +58,8 @@ def display_matches():
         print(f"  Date: {match.date}")
         print(f"  Picture: {match.picture}")
         print(f"  Notes: {match.notes or 'None'}")
+        print(f"  Latitude: {match.latitude or 'None'}")
+        print(f"  Longitude: {match.longitude or 'None'}")
         print(f"  Created: {match.created_at}")
 
 

@@ -24,6 +24,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
   String? _imagePath;
   final TextEditingController _notesController = TextEditingController();
   bool _isSubmitting = false;
+  bool _sharePosition = true;
 
   @override
   void dispose() {
@@ -78,6 +79,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       isVictory: _isVictory,
       date: _date,
       notes: _notesController.text.isNotEmpty ? _notesController.text : null,
+      sharePosition: _sharePosition,
     );
 
     if (!mounted) return;
@@ -103,7 +105,17 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
       } catch (_) {}
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Partita aggiunta')));
+      // Notify if location was requested but unavailable
+      if (viewModel.lastPositionUnavailable) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Partita aggiunta, ma la posizione non era disponibile'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Partita aggiunta')));
+      }
 
       if (!mounted) return;
       // Only pop if this route was pushed. If this screen is inside a PageView (no
@@ -118,6 +130,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
           _date = DateTime.now();
           _isVictory = false;
           _isSubmitting = false;
+          _sharePosition = true;
         });
       }
     } else {
@@ -189,6 +202,19 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               Text('${_date.day}/${_date.month}/${_date.year}'),
               const SizedBox(width: 12),
               ElevatedButton(onPressed: _pickDate, child: const Text('Cambia data')),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Share position toggle
+          Row(
+            children: [
+              const Text('Condividi posizione:'),
+              const SizedBox(width: 12),
+              Switch(
+                value: _sharePosition,
+                onChanged: (value) => setState(() => _sharePosition = value),
+              ),
             ],
           ),
           const SizedBox(height: 12),

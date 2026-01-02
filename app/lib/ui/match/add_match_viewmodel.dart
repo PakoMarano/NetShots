@@ -11,26 +11,35 @@ class AddMatchViewModel extends ChangeNotifier {
   final ProfileRepository _profileRepository;
 
   bool _isSubmitting = false;
+  bool _lastPositionUnavailable = false;
 
   AddMatchViewModel(this._matchRepository, this._imageStorageRepository, this._profileRepository);
 
   bool get isSubmitting => _isSubmitting;
+  bool get lastPositionUnavailable => _lastPositionUnavailable;
 
   Future<bool> submitMatch({
     required String imagePath,
     required bool isVictory,
     required DateTime date,
     String? notes,
+    required bool sharePosition,
   }) async {
     if (imagePath.isEmpty) return false;
     _isSubmitting = true;
+    _lastPositionUnavailable = false;
     notifyListeners();
 
     try {
       final profile = await _profileRepository.getProfile();
       if (profile == null) throw Exception('User profile not found');
 
-      final position = await _tryGetPosition();
+      final position = sharePosition ? await _tryGetPosition() : null;
+      // Track if user wanted to share position but it was unavailable
+      if (sharePosition && position == null) {
+        _lastPositionUnavailable = true;
+      }
+      
       final permanent = await _imageStorageRepository.saveImage(imagePath);
 
       final match = MatchModel(
