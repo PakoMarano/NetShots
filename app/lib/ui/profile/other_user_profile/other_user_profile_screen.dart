@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:netshots/data/models/match_model.dart';
 import 'other_user_profile_viewmodel.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
@@ -149,9 +151,11 @@ class OtherUserProfileScreen extends StatelessWidget {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         final photoUrl = pictures[index];
+                        final matches = viewModel.pictureMatches[photoUrl] ?? [];
+                        final match = matches.isNotEmpty ? matches.first : null;
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                          child: _buildPhotoCard(context, photoUrl),
+                          child: _buildPhotoCard(context, photoUrl, match),
                         );
                       },
                       childCount: pictures.length,
@@ -187,9 +191,10 @@ class OtherUserProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPhotoCard(BuildContext context, String photoUrl) {
+  Widget _buildPhotoCard(BuildContext context, String photoUrl, MatchModel? match) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hasLocation = match?.latitude != null && match?.longitude != null;
 
     return Card(
       elevation: isDark ? 3 : 1,
@@ -215,6 +220,38 @@ class OtherUserProfileScreen extends StatelessWidget {
                   ]
                 : null,
           ),
+          child: hasLocation
+              ? Stack(
+                  children: [
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: GestureDetector(
+                          onTap: () => _launchMap(context, match!.latitude!, match.longitude!),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : null,
         ),
       ),
     );
@@ -237,5 +274,24 @@ class OtherUserProfileScreen extends StatelessWidget {
       return NetworkImage(imagePath);
     }
     return FileImage(File(imagePath));
+  }
+
+  Future<void> _launchMap(BuildContext context, double latitude, double longitude) async {
+    try {
+      final url = Uri.parse('geo:$latitude,$longitude');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Impossibile aprire la mappa')),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore nell\'apertura della mappa: $e')),
+      );
+    }
   }
 }

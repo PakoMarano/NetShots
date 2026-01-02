@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:netshots/ui/profile/profile_screen/profile_viewmodel.dart';
 import 'package:netshots/data/models/user_profile_model.dart';
@@ -346,6 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final Color borderColor = isVictory == null
         ? (isDark ? Colors.white10 : Colors.grey.shade300)
         : (isVictory ? Colors.green : Colors.red);
+    final hasLocation = match.latitude != null && match.longitude != null;
 
     return GestureDetector(
       onTap: () => _selectImage(index),
@@ -423,6 +425,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ),
+                    // Map icon (bottom-right) if location data exists
+                    if (hasLocation)
+                      Positioned(
+                        bottom: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () => _launchMap(match.latitude!, match.longitude!),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.blue,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.location_on,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
                     // Date label at bottom-left of the photo
                     Positioned(
                       bottom: 8,
@@ -588,5 +618,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     // Otherwise, it's a local file
     return FileImage(File(imagePath));
+  }
+
+  Future<void> _launchMap(double latitude, double longitude) async {
+    try {
+      final url = Uri.parse('geo:$latitude,$longitude');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Impossibile aprire la mappa')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore nell\'apertura della mappa: $e')),
+      );
+    }
   }
 }

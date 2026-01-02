@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:netshots/ui/user_search/user_search_bar.dart';
 import 'package:netshots/ui/user_search/user_search_sheet.dart';
 import 'package:netshots/ui/profile/other_user_profile/other_user_profile_screen.dart';
@@ -209,6 +210,7 @@ class _FeedItemCard extends StatelessWidget {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hasLocation = match.latitude != null && match.longitude != null;
 
     return GestureDetector(
       onTap: () {
@@ -315,6 +317,34 @@ class _FeedItemCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                        // Map icon (bottom-right) if location data exists
+                        if (hasLocation)
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () => _launchMap(context, match.latitude!, match.longitude!),
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.3),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.location_on,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -356,5 +386,24 @@ class _FeedItemCard extends StatelessWidget {
     }
     // Otherwise, it's a local file
     return FileImage(File(imagePath));
+  }
+
+  Future<void> _launchMap(BuildContext context, double latitude, double longitude) async {
+    try {
+      final url = Uri.parse('geo:$latitude,$longitude');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Impossibile aprire la mappa')),
+        );
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Errore nell\'apertura della mappa: $e')),
+      );
+    }
   }
 }
