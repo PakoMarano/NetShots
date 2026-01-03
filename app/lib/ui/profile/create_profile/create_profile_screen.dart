@@ -113,8 +113,8 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
                     onPressed: viewModel.isLoading ? null : () {
                       if (!_validateInputs(context)) return;
                       viewModel.createProfile(
-                        _firstNameController.text.trim(),
-                        _lastNameController.text.trim(),
+                        _capitalizeFirstLetter(_firstNameController.text.trim()),
+                        _capitalizeFirstLetter(_lastNameController.text.trim()),
                         _selectedBirthDate!,
                         _selectedGender,
                       );
@@ -182,6 +182,11 @@ class _CreateProfileScreenState extends State<CreateProfileScreen> {
         _selectedBirthDate = picked;
       });
     }
+  }
+
+  String _capitalizeFirstLetter(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1).toLowerCase();
   }
 
   bool _validateInputs(BuildContext context) {
