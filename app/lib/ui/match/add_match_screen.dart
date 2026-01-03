@@ -152,7 +152,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               onTap: () => _showImageOptions(),
               child: Container(
                 width: double.infinity,
-                height: 220,
+                height: 180,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.shade300),
@@ -170,7 +170,7 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
           // Victory toggle
           Row(
