@@ -89,10 +89,10 @@ class _AddMatchScreenState extends State<AddMatchScreen> {
 
     if (success) {
       if (!mounted) return;
-      // Refresh profile gallery so the new picture appears when the user visits the profile
+      // Refresh profile (stats + gallery) so counts and photos update immediately
       try {
         final profileVm = Provider.of<ProfileViewModel>(context, listen: false);
-        await profileVm.loadGallery();
+        await profileVm.loadUserProfile(force: true, silent: true);
       } catch (_) {
         // ignore if profile VM not available
       }

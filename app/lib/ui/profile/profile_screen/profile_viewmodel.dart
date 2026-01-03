@@ -25,42 +25,41 @@ class ProfileViewModel extends ChangeNotifier {
   List<String> get gallery => _gallery;
   List<MatchModel> get galleryMatches => _galleryMatches;
 
-  Future<void> loadUserProfile() async {
-    // Avoid reloading if profile is already loaded and not empty
-    if (_userProfile != null && !_isLoading) {
+  Future<void> loadUserProfile({bool force = false, bool silent = false}) async {
+    // Avoid reloading if profile is already loaded and not empty, unless forced
+    if (!force && _userProfile != null && !_isLoading) {
       return;
     }
     
-    _isLoading = true;
-    notifyListeners();
+    if (!silent) {
+      _isLoading = true;
+      notifyListeners();
+    }
     try {
       _userProfile = await _profileRepository.getProfile();
       // Load gallery derived from matches if we have a profile
       if (_userProfile != null) {
         await loadGallery();
+      } else {
+        _gallery = [];
+        _galleryMatches = [];
       }
     } catch (e) {
-      // Handle error
+      // Handle error and clear cached data to avoid stale UI
       _userProfile = null;
+      _gallery = [];
+      _galleryMatches = [];
     } finally {
-      _isLoading = false;
+      if (!silent) {
+        _isLoading = false;
+      }
       notifyListeners();
     }
   }
 
   // Method to force reload the profile (useful after profile creation/update)
-  Future<void> forceReloadUserProfile() async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      _userProfile = await _profileRepository.getProfile();
-    } catch (e) {
-      // Handle error
-      _userProfile = null;
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+  Future<void> forceReloadUserProfile({bool silent = false}) async {
+    await loadUserProfile(force: true, silent: silent);
   }
 
   Future<void> deleteProfile() async {
@@ -107,8 +106,8 @@ class ProfileViewModel extends ChangeNotifier {
   await _imageStorageRepository.deleteImage(imageToDelete);
       }
 
-      // Refresh gallery
-      await loadGallery();
+      // Reload profile to refresh both stats and gallery
+      await loadUserProfile(force: true, silent: true);
     } catch (e) {
       rethrow;
     } finally {
