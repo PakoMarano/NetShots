@@ -1,7 +1,8 @@
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import firebase_admin
+import requests
 from flask import Flask, abort, jsonify, request
 from firebase_admin import auth, credentials
 
@@ -36,6 +37,40 @@ def _configure_firebase() -> None:
     cred = credentials.Certificate(cred_path)
     firebase_admin.initialize_app(cred)
 
+def _fetch_weather_data(latitude: float, longitude: float, match_datetime: Any) -> Tuple[Optional[float], Optional[str]]:
+	"""Fetch weather data from OpenWeather API.
+	
+	Returns tuple of (temperature, weather_description).
+	Returns (None, None) if API key is missing or request fails.
+	"""
+	api_key = os.getenv('OPENWEATHER_API_KEY')
+	if not api_key:
+		return None, None
+	
+	try:
+		# Use OpenWeather One Call API or Current Weather API
+		# For historical data, we'd use Historical Weather API, but that requires paid plan
+		# Using Current Weather API as fallback
+		url = "https://api.openweathermap.org/data/2.5/weather"
+		params = {
+			"lat": latitude,
+			"lon": longitude,
+			"appid": api_key,
+			"units": "metric"  # Get temperature in Celsius
+		}
+		
+		response = requests.get(url, params=params, timeout=5)
+		if response.status_code == 200:
+			data = response.json()
+			temperature = data.get("main", {}).get("temp")
+			weather_description = data.get("weather", [{}])[0].get("description")
+			return temperature, weather_description
+		
+	except Exception:
+		# Silently fail and return None values
+		pass
+	
+	return None, None
 
 def register_error_handlers(app: Flask) -> None:
     @app.errorhandler(400)
@@ -282,8 +317,30 @@ def register_routes(app: Flask) -> None:
         payload = _get_payload()
         match_id = str(payload.get("id") or _generate_id())
 
+        # Fetch weather data if coordinates are available
+        temperature = None
+        weather_description = None
+        latitude = payload.get("latitude")
+        longitude = payload.get("longitude")
+        match_datetime = payload.get("date")
+        
+        if latitude is not None and longitude is not None:
+            try:
+                lat_float = float(latitude)
+                lon_float = float(longitude)
+                temperature, weather_description = _fetch_weather_data(lat_float, lon_float, match_datetime)
+            except (TypeError, ValueError):
+                # Invalid coordinates, skip weather fetch
+                pass
+
         try:
-            match = Match.from_payload(payload=payload, user_id=uid, match_id=match_id)
+            match = Match.from_payload(
+                payload=payload,
+                user_id=uid,
+                match_id=match_id,
+                temperature=temperature,
+                weather_description=weather_description
+            )
             db.session.add(match)
             db.session.commit()
         except ValueError as exc:

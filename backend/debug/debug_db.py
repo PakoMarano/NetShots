@@ -60,6 +60,8 @@ def display_matches():
         print(f"  Notes: {match.notes or 'None'}")
         print(f"  Latitude: {match.latitude or 'None'}")
         print(f"  Longitude: {match.longitude or 'None'}")
+        print(f"  Temperature: {match.temperature or 'None'}")
+        print(f"  Weather: {match.weather_description or 'None'}")
         print(f"  Created: {match.created_at}")
 
 

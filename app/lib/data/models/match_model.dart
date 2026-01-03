@@ -7,6 +7,8 @@ class MatchModel {
   final String? notes;
   final double? latitude;
   final double? longitude;
+  final double? temperature;
+  final String? weatherDescription;
 
   MatchModel({
     required this.id,
@@ -17,6 +19,8 @@ class MatchModel {
     this.notes,
     this.latitude,
     this.longitude,
+    this.temperature,
+    this.weatherDescription,
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +33,8 @@ class MatchModel {
       'notes': notes,
       'latitude': latitude,
       'longitude': longitude,
+      'temperature': temperature,
+      'weatherDescription': weatherDescription,
     };
   }
 
@@ -48,6 +54,8 @@ class MatchModel {
       notes: map['notes'],
       latitude: _toDouble(map['latitude']),
       longitude: _toDouble(map['longitude']),
+      temperature: _toDouble(map['temperature']),
+      weatherDescription: map['weatherDescription'],
     );
   }
 
@@ -60,6 +68,8 @@ class MatchModel {
     String? notes,
     double? latitude,
     double? longitude,
+    double? temperature,
+    String? weatherDescription,
   }) {
     return MatchModel(
       id: id ?? this.id,
@@ -70,12 +80,14 @@ class MatchModel {
       notes: notes ?? this.notes,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      temperature: temperature ?? this.temperature,
+      weatherDescription: weatherDescription ?? this.weatherDescription,
     );
   }
 
   @override
   String toString() {
-    return 'MatchModel(id: $id, userId: $userId, isVictory: $isVictory, date: $date, picture: $picture, lat: $latitude, lng: $longitude)';
+    return 'MatchModel(id: $id, userId: $userId, isVictory: $isVictory, date: $date, picture: $picture, lat: $latitude, lng: $longitude, temp: $temperature, weather: $weatherDescription)';
   }
 
   static double? _toDouble(dynamic value) {

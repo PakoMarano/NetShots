@@ -145,6 +145,8 @@ class Match(db.Model):
 	notes = db.Column(db.Text)
 	latitude = db.Column(Float)
 	longitude = db.Column(Float)
+	temperature = db.Column(Float)
+	weather_description = db.Column(db.String(255))
 	created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
 
 	user = db.relationship("UserProfile", backref=db.backref("matches", lazy=True))
@@ -159,10 +161,12 @@ class Match(db.Model):
 			"notes": self.notes,
 			"latitude": self.latitude,
 			"longitude": self.longitude,
+			"temperature": self.temperature,
+			"weatherDescription": self.weather_description,
 		}
 
 	@classmethod
-	def from_payload(cls, *, payload: Dict[str, Any], user_id: str, match_id: str) -> "Match":
+	def from_payload(cls, *, payload: Dict[str, Any], user_id: str, match_id: str, temperature: Optional[float] = None, weather_description: Optional[str] = None) -> "Match":
 		date = _parse_datetime(payload.get("date"))
 		picture = _parse_picture(payload.get("picture"))
 		is_victory = _parse_bool(payload.get("isVictory"))
@@ -178,6 +182,8 @@ class Match(db.Model):
 			notes=_parse_optional_str(payload.get("notes")),
 			latitude=latitude,
 			longitude=longitude,
+			temperature=temperature,
+			weather_description=weather_description,
 		)
 
 	def update_from_payload(self, payload: Dict[str, Any]) -> None:
