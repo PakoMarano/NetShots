@@ -2,8 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:netshots/ui/profile/delete_profile/delete_profile_viewmodel.dart';
 
-class DeleteProfileButton extends StatelessWidget {
+class DeleteProfileButton extends StatefulWidget {
   const DeleteProfileButton({super.key});
+
+  @override
+  State<DeleteProfileButton> createState() => _DeleteProfileButtonState();
+}
+
+class _DeleteProfileButtonState extends State<DeleteProfileButton> {
+  DeleteProfileViewModel? _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewModel = Provider.of<DeleteProfileViewModel>(context, listen: false);
+      _viewModel?.addListener(_onViewModelChanged);
+    });
+  }
+
+  @override
+  void dispose() {
+    _viewModel?.removeListener(_onViewModelChanged);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +42,26 @@ class DeleteProfileButton extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _onViewModelChanged() {
+    if (!mounted || _viewModel == null) return;
+    
+    // Handle error message
+    if (_viewModel!.errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_viewModel!.errorMessage!),
+          backgroundColor: Colors.red,
+        ),
+      );
+      _viewModel!.clearError();
+    }
+    
+    // Handle navigation after successful deletion
+    if (_viewModel!.isDeleted) {
+      Navigator.pushReplacementNamed(context, '/create-profile');
+    }
   }
 
   void _showDeleteConfirmationDialog(BuildContext context, DeleteProfileViewModel viewModel) {
@@ -41,23 +83,10 @@ class DeleteProfileButton extends StatelessWidget {
                 return TextButton(
                   onPressed: viewModel.isDeleting 
                     ? null 
-                    : () async {
+                    : () {
                         Navigator.of(context).pop(); // Close the dialog
                         Navigator.of(context).pop(); // Close the drawer
-                        
-                        final success = await viewModel.deleteProfile();
-                        if (context.mounted && success) {
-                          // After deleting the profile, go back to create profile screen
-                          Navigator.pushReplacementNamed(context, '/create-profile');
-                        } else if (context.mounted) {
-                          // Show error message if deletion failed
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Errore durante l\'eliminazione del profilo'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
+                        viewModel.deleteProfile();
                       },
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.red,
