@@ -5,6 +5,7 @@ import 'package:netshots/ui/user_search/user_search_bar.dart';
 import 'package:netshots/ui/user_search/user_search_sheet.dart';
 import 'package:netshots/ui/profile/other_user_profile/other_user_profile_screen.dart';
 import 'package:netshots/ui/core/widgets/match_image_card.dart';
+import 'package:netshots/data/models/feed_item_model.dart';
 import 'dart:io';
 import 'friends_viewmodel.dart';
 
@@ -198,7 +199,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
 }
 
 class _FeedItemCard extends StatelessWidget {
-  final feedItem;
+  final FeedItem feedItem;
 
   const _FeedItemCard({required this.feedItem});
 
@@ -249,10 +250,10 @@ class _FeedItemCard extends StatelessWidget {
                     backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
                         ? _getImageProvider(user.profilePicture!)
                         : null,
+                    radius: 20,
                     child: user.profilePicture == null || user.profilePicture!.isEmpty
                         ? Icon(Icons.person, color: Colors.grey.shade600, size: 24)
                         : null,
-                    radius: 20,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
