@@ -7,7 +7,7 @@ import 'package:netshots/ui/home/home_viewmodel.dart';
 import 'package:netshots/ui/friends/friends_screen.dart';
 import 'package:netshots/ui/match/add_match_screen.dart';
 import 'package:netshots/ui/profile/profile_screen/profile_screen.dart';
-import 'package:netshots/ui/settings/settings_drawer.dart';
+import 'package:netshots/ui/home/settings/settings_drawer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

@@ -362,6 +362,12 @@ def register_routes(app: Flask) -> None:
         db.session.commit()
         return jsonify({"deleted": match_id})
 
+    @app.route('/api/match-results/<user_id>', methods=['GET'])
+    def get_match_results(user_id: str) -> Tuple[Dict[str, Any], int]:
+        matches = Match.query.filter_by(user_id=user_id).all()  # Fetch matches for the user
+        results = [match.is_victory for match in matches]  # Assuming Match model has is_victory attribute
+        return jsonify(results), 200
+
 
 def _require_user() -> Tuple[str, str]:
     auth_header = request.headers.get("Authorization", "")

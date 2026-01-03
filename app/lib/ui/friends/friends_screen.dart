@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:netshots/ui/user_search/user_search_bar.dart';
-import 'package:netshots/ui/user_search/user_search_sheet.dart';
+import 'package:netshots/ui/friends/user_search/user_search_bar.dart';
+import 'package:netshots/ui/friends/user_search/user_search_sheet.dart';
 import 'package:netshots/ui/profile/other_user_profile/other_user_profile_screen.dart';
 import 'package:netshots/ui/core/widgets/match_image_card.dart';
 import 'package:netshots/data/models/feed_item_model.dart';

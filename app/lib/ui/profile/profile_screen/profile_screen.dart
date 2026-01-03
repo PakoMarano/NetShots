@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:netshots/ui/profile/stats/stats_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -195,6 +196,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
+        ),
+        const SizedBox(height: 8),
+        // Stats button (navigates to StatsScreen)
+        IconButton(
+          icon: const Icon(Icons.show_chart, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => StatsScreen(userId: userProfile.userId)),
+            );
+          },
         ),
       ],
     );

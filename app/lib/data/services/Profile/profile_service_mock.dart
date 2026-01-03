@@ -71,4 +71,10 @@ class ProfileServiceMock implements ProfileServiceInterface {
     final profileJson = jsonEncode(profileData);
     await _sharedPreferences.setString(_profileKey, profileJson);
   }
+
+  @override
+  Future<List<bool>> getMatchResults(String userId) async {
+    // Mocked data for testing
+    return [true, false, true, true];
+  }
 }

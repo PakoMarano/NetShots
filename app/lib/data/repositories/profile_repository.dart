@@ -29,4 +29,8 @@ class ProfileRepository {
   Future<void> deleteProfile() async {
     await _profileService.deleteProfile();
   }
+
+  Future<List<bool>> getMatchResults(String userId) async {
+    return await _profileService.getMatchResults(userId);
+  }
 }

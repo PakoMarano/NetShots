@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:netshots/ui/profile/stats/stats_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:netshots/data/models/match_model.dart';
 import 'package:netshots/ui/core/widgets/match_image_card.dart';
@@ -8,6 +9,7 @@ import 'other_user_profile_viewmodel.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
 import 'package:netshots/ui/follow/follow_button.dart';
+
 
 class OtherUserProfileScreen extends StatelessWidget {
   final String userId;
@@ -164,6 +166,17 @@ class OtherUserProfileScreen extends StatelessWidget {
               ],
             );
           },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => StatsScreen(userId: userId)),
+            );
+          },
+          backgroundColor: Theme.of(context).primaryColor,
+          foregroundColor: Colors.white,
+          child: Icon(Icons.show_chart),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:netshots/ui/settings/settings_viewmodel.dart';
+import 'package:netshots/ui/home/settings/settings_viewmodel.dart';
 import 'package:netshots/ui/profile/delete_profile/delete_profile_button.dart';
 
 class SettingsDrawer extends StatelessWidget {

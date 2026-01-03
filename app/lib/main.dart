@@ -29,8 +29,8 @@ import 'package:netshots/ui/profile/create_profile/create_profile_screen.dart';
 import 'package:netshots/ui/profile/create_profile/create_profile_viewmodel.dart';
 import 'package:netshots/ui/profile/delete_profile/delete_profile_viewmodel.dart';
 import 'package:netshots/ui/profile/profile_screen/profile_viewmodel.dart';
-import 'package:netshots/ui/settings/settings_viewmodel.dart';
-import 'package:netshots/ui/user_search/user_search_viewmodel.dart';
+import 'package:netshots/ui/home/settings/settings_viewmodel.dart';
+import 'package:netshots/ui/friends/user_search/user_search_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import 'firebase_options.dart';
