@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:netshots/ui/profile/profile_screen/profile_viewmodel.dart';
 import 'package:netshots/data/models/user_profile_model.dart';
 import 'package:netshots/data/models/match_model.dart';
+import 'package:netshots/ui/core/widgets/match_image_card.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -99,11 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           child: _buildPhotoWithNote(match, index, isVictory: match.isVictory),
                         );
                       }
-                      final photoUrl = pictures[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                        child: _buildPhotoRow(photoUrl, index),
-                      );
+                      return const SizedBox.shrink();
                     },
                     childCount: pictures.length,
                   ),
@@ -241,261 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '${s}M';
   }
 
-  /// Short date formatter (DD/MM/YYYY)
-  String _formatDateShort(DateTime d) {
-    final dd = d.day.toString().padLeft(2, '0');
-    final mm = d.month.toString().padLeft(2, '0');
-    final yyyy = d.year.toString();
-    return '$dd/$mm/$yyyy';
-  }
-
-  
-
-  Widget _buildPhotoRow(String photoUrl, int index, {bool? isVictory}) {
-    // Provide a card background and ensure visibility in both light and dark modes
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final Color borderColor = isVictory == null
-        ? (isDark ? Colors.white10 : Colors.grey.shade300)
-        : (isVictory ? Colors.green : Colors.red);
-
-    return GestureDetector(
-      onTap: () => _selectImage(index),
-      onLongPress: () => _selectImage(index),
-      child: Card(
-        elevation: isDark ? 3 : 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        color: theme.colorScheme.surface,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(10),
-          child: Container(
-            height: 320,
-            decoration: BoxDecoration(
-              border: Border.all(color: borderColor),
-              image: DecorationImage(
-                image: _getImageProvider(photoUrl),
-                fit: BoxFit.cover,
-              ),
-              boxShadow: isDark
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.75),
-                        blurRadius: 7,
-                        offset: const Offset(0, 2),
-                      )
-                    ]
-                  : null,
-            ),
-            child: Stack(
-              children: [
-                if (isVictory != null)
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: isVictory ? Colors.green : Colors.red,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        isVictory ? Icons.emoji_events : Icons.close,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                // top-right small edit icon
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: () => _selectImage(index),
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPhotoWithNote(MatchModel match, int index, {bool? isVictory}) {
-    // Group the photo and the note inside a card so users visually associate them.
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final Color borderColor = isVictory == null
-        ? (isDark ? Colors.white10 : Colors.grey.shade300)
-        : (isVictory ? Colors.green : Colors.red);
-    final hasLocation = match.latitude != null && match.longitude != null;
-
-    return GestureDetector(
+    return MatchImageCard(
+      match: match,
+      index: index,
       onTap: () => _selectImage(index),
-      onLongPress: () => _selectImage(index),
-      child: Card(
-        elevation: isDark ? 3 : 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        color: theme.colorScheme.surface,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Photo
-            ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12)),
-              child: Container(
-                height: 320,
-                decoration: BoxDecoration(
-                  border: Border.all(color: borderColor),
-                  image: DecorationImage(
-                    image: _getImageProvider(match.picture),
-                    fit: BoxFit.cover,
-                  ),
-                  boxShadow: isDark
-                      ? [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.6),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          )
-                        ]
-                      : null,
-                ),
-                child: Stack(
-                  children: [
-                    if (isVictory != null)
-                      Positioned(
-                        top: 8,
-                        left: 8,
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: isVictory ? Colors.green : Colors.red,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            isVictory ? Icons.emoji_events : Icons.close,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: () => _selectImage(index),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Map icon (bottom-right) if location data exists
-                    if (hasLocation)
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: () => _launchMap(match.latitude!, match.longitude!),
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.location_on,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                          ),
-                        ),
-                      ),
-                    // Date label at bottom-left of the photo
-                    Positioned(
-                      bottom: 8,
-                      left: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          _formatDateShort(match.date),
-                          style: const TextStyle(color: Colors.white, fontSize: 12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Note area with a light background to visually connect it to the photo
-            if (match.notes != null && match.notes!.isNotEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white.withValues(alpha: 0.03) : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
-                  borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(12), bottomRight: Radius.circular(12)),
-                ),
-                child: Text(
-                  match.notes!,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-          ],
-        ),
-      ),
+      onDelete: () => _removeImage(index, Provider.of<ProfileViewModel>(context, listen: false)),
     );
   }
 
@@ -618,33 +365,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
     // Otherwise, it's a local file
     return FileImage(File(imagePath));
-  }
-
-  Future<void> _launchMap(double latitude, double longitude) async {
-    try {
-      // Try native maps app first (geo: URI)
-      final geoUrl = Uri.parse('geo:$latitude,$longitude');
-      if (await canLaunchUrl(geoUrl)) {
-        await launchUrl(geoUrl);
-        return;
-      }
-      
-      // Fallback to browser-based Google Maps
-      final webUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
-      if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-      
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Impossibile aprire la mappa')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Errore nell\'apertura della mappa: $e')),
-      );
-    }
   }
 }

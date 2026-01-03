@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:netshots/data/models/match_model.dart';
+import 'package:netshots/ui/core/widgets/match_image_card.dart';
 import 'other_user_profile_viewmodel.dart';
 import 'package:netshots/data/repositories/profile_repository.dart';
 import 'package:netshots/data/repositories/match_repository.dart';
@@ -192,68 +192,38 @@ class OtherUserProfileScreen extends StatelessWidget {
   }
 
   Widget _buildPhotoCard(BuildContext context, String photoUrl, MatchModel? match) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final hasLocation = match?.latitude != null && match?.longitude != null;
-
-    return Card(
-      elevation: isDark ? 3 : 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      color: theme.colorScheme.surface,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          height: 320,
-          decoration: BoxDecoration(
-            border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
-            image: DecorationImage(
-              image: _getImageProvider(photoUrl),
-              fit: BoxFit.cover,
-            ),
-            boxShadow: isDark
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.6),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
-                : null,
+    if (match == null) {
+      // Fallback: Simple image container matching MatchImageCard height
+      return Card(
+        elevation: Theme.of(context).brightness == Brightness.dark ? 3 : 1,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        color: Theme.of(context).colorScheme.surface,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
           ),
-          child: hasLocation
-              ? Stack(
-                  children: [
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: GestureDetector(
-                          onTap: () => _launchMap(context, match!.latitude!, match.longitude!),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.location_on,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              : null,
+          child: Container(
+            height: 320,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: _getImageProvider(photoUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
         ),
-      ),
+      );
+    }
+
+    return MatchImageCard(
+      match: match,
+      index: 0,
+      onTap: () {
+        // Navigate to full match details if needed
+      },
     );
   }
 
@@ -274,33 +244,5 @@ class OtherUserProfileScreen extends StatelessWidget {
       return NetworkImage(imagePath);
     }
     return FileImage(File(imagePath));
-  }
-
-  Future<void> _launchMap(BuildContext context, double latitude, double longitude) async {
-    try {
-      // Try native maps app first (geo: URI)
-      final geoUrl = Uri.parse('geo:$latitude,$longitude');
-      if (await canLaunchUrl(geoUrl)) {
-        await launchUrl(geoUrl);
-        return;
-      }
-      
-      // Fallback to browser-based Google Maps
-      final webUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
-      if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-      
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Impossibile aprire la mappa')),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Errore nell\'apertura della mappa: $e')),
-      );
-    }
   }
 }

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:netshots/ui/user_search/user_search_bar.dart';
 import 'package:netshots/ui/user_search/user_search_sheet.dart';
 import 'package:netshots/ui/profile/other_user_profile/other_user_profile_screen.dart';
-import 'package:intl/intl.dart';
+import 'package:netshots/ui/core/widgets/match_image_card.dart';
 import 'dart:io';
 import 'friends_viewmodel.dart';
 
@@ -207,10 +206,8 @@ class _FeedItemCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final match = feedItem.match;
     final user = feedItem.user;
-    final dateFormat = DateFormat('dd/MM/yyyy');
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final hasLocation = match.latitude != null && match.longitude != null;
 
     return GestureDetector(
       onTap: () {
@@ -225,154 +222,68 @@ class _FeedItemCard extends StatelessWidget {
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-        child: Card(
-          elevation: isDark ? 3 : 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          color: theme.colorScheme.surface,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // User info header
-              ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.grey.shade300,
-                  backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
-                      ? _getImageProvider(user.profilePicture!)
-                      : null,
-                  child: user.profilePicture == null || user.profilePicture!.isEmpty
-                      ? Icon(Icons.person, color: Colors.grey.shade600)
-                      : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // User info header
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(15),
                 ),
-                title: Text(
-                  user.displayName,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.grey.shade300,
+                    backgroundImage: user.profilePicture != null && user.profilePicture!.isNotEmpty
+                        ? _getImageProvider(user.profilePicture!)
+                        : null,
+                    child: user.profilePicture == null || user.profilePicture!.isEmpty
+                        ? Icon(Icons.person, color: Colors.grey.shade600, size: 24)
+                        : null,
+                    radius: 20,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      user.displayName,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Match card
+            if (match.picture.isNotEmpty)
+              SizedBox(
+                height: 400,
+                child: MatchImageCard(
+                  match: match,
+                  index: 0,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => OtherUserProfileScreen(
+                          userId: user.userId,
+                          displayName: user.displayName,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-              // Match image
-              if (match.picture.isNotEmpty)
-                ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(15),
-                    bottomRight: Radius.circular(15),
-                  ),
-                  child: Container(
-                    height: 320,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: match.isVictory ? Colors.green : Colors.red,
-                      ),
-                      image: DecorationImage(
-                        image: _getImageProvider(match.picture),
-                        fit: BoxFit.cover,
-                      ),
-                      boxShadow: isDark
-                          ? [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.6),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              )
-                            ]
-                          : null,
-                    ),
-                    child: Stack(
-                      children: [
-                        // Victory/loss badge (top-left)
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: match.isVictory ? Colors.green : Colors.red,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              match.isVictory ? Icons.emoji_events : Icons.close,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                          ),
-                        ),
-                        // Date label (bottom-left)
-                        Positioned(
-                          bottom: 8,
-                          left: 8,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              dateFormat.format(match.date),
-                              style: const TextStyle(color: Colors.white, fontSize: 12),
-                            ),
-                          ),
-                        ),
-                        // Map icon (bottom-right) if location data exists
-                        if (hasLocation)
-                          Positioned(
-                            bottom: 8,
-                            right: 8,
-                            child: GestureDetector(
-                              onTap: () => _launchMap(context, match.latitude!, match.longitude!),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: BorderRadius.circular(16),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.3),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: const Icon(
-                                  Icons.location_on,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              // Match notes (if available)
-              if (match.notes != null && match.notes!.isNotEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.03) : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(15),
-                      bottomRight: Radius.circular(15),
-                    ),
-                  ),
-                  child: Text(
-                    match.notes!,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.95),
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -386,33 +297,5 @@ class _FeedItemCard extends StatelessWidget {
     }
     // Otherwise, it's a local file
     return FileImage(File(imagePath));
-  }
-
-  Future<void> _launchMap(BuildContext context, double latitude, double longitude) async {
-    try {
-      // Try native maps app first (geo: URI)
-      final geoUrl = Uri.parse('geo:$latitude,$longitude');
-      if (await canLaunchUrl(geoUrl)) {
-        await launchUrl(geoUrl);
-        return;
-      }
-      
-      // Fallback to browser-based Google Maps
-      final webUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
-      if (await canLaunchUrl(webUrl)) {
-        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
-        return;
-      }
-      
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Impossibile aprire la mappa')),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Errore nell\'apertura della mappa: $e')),
-      );
-    }
   }
 }
