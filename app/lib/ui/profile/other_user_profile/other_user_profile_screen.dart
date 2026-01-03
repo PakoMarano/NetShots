@@ -84,47 +84,85 @@ class OtherUserProfileScreen extends StatelessWidget {
                     child: SafeArea(
                       bottom: false,
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                         child: Column(
                           children: [
-                            CircleAvatar(
-                              radius: 55,
-                              backgroundColor: Colors.grey.shade300,
-                              backgroundImage: userProfile.profilePicture != null && userProfile.profilePicture!.isNotEmpty
-                                  ? _getImageProvider(userProfile.profilePicture!)
-                                  : null,
-                              child: userProfile.profilePicture == null || userProfile.profilePicture!.isEmpty
-                                  ? Icon(Icons.person, size: 54, color: Colors.grey.shade600)
-                                  : null,
-                            ),
-                            const SizedBox(height: 14),
-                            Text(
-                              userProfile.fullName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.white,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '${userProfile.age} anni',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
+                            // Profile picture and stats row
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
+                                // Profile picture (center)
+                                CircleAvatar(
+                                  radius: 42.5,
+                                  backgroundColor: Colors.white,
+                                  child: CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor: Colors.grey.shade300,
+                                    backgroundImage: userProfile.profilePicture != null && userProfile.profilePicture!.isNotEmpty
+                                        ? _getImageProvider(userProfile.profilePicture!)
+                                        : null,
+                                    child: userProfile.profilePicture == null || userProfile.profilePicture!.isEmpty
+                                        ? Icon(Icons.person, size: 40, color: Colors.grey.shade600)
+                                        : null,
+                                  ),
+                                ),
                                 _buildStatColumn(_formatCount(userProfile.totalMatches), 'Giocate', color: Colors.white),
                                 _buildStatColumn(_formatCount(userProfile.victories), 'Vittorie', color: Colors.greenAccent),
                                 _buildStatColumn(_formatCount(userProfile.losses), 'Sconfitte', color: Colors.redAccent),
                               ],
                             ),
                             const SizedBox(height: 16),
+                            // Name, age, and stats icon
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (context) => StatsScreen(userId: userId)),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(color: Colors.white, width: 1.5),
+                                        ),
+                                        child: const Icon(
+                                          Icons.show_chart,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      userProfile.fullName,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  '${userProfile.age} anni',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
                             FollowButton(
                               targetId: userId,
                               displayName: userProfile.fullName,
@@ -166,17 +204,6 @@ class OtherUserProfileScreen extends StatelessWidget {
               ],
             );
           },
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => StatsScreen(userId: userId)),
-            );
-          },
-          backgroundColor: Theme.of(context).primaryColor,
-          foregroundColor: Colors.white,
-          child: Icon(Icons.show_chart),
         ),
       ),
     );

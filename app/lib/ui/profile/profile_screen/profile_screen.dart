@@ -179,34 +179,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        // Name and bio
-        SizedBox(
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                '${userProfile.firstName} ${userProfile.lastName}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: Colors.white,
+        // Name and stats icon aligned horizontally
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => StatsScreen(userId: userProfile.userId)),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.white, width: 1.5),
                 ),
-                textAlign: TextAlign.center,
+                child: const Icon(
+                  Icons.show_chart,
+                  color: Colors.white,
+                  size: 20,
+                ),
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 8),
-        // Stats button (navigates to StatsScreen)
-        IconButton(
-          icon: const Icon(Icons.show_chart, color: Colors.white),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => StatsScreen(userId: userProfile.userId)),
-            );
-          },
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '${userProfile.firstName} ${userProfile.lastName}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ],
     );
