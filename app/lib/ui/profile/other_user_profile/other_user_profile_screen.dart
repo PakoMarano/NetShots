@@ -278,15 +278,24 @@ class OtherUserProfileScreen extends StatelessWidget {
 
   Future<void> _launchMap(BuildContext context, double latitude, double longitude) async {
     try {
-      final url = Uri.parse('geo:$latitude,$longitude');
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url);
-      } else {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Impossibile aprire la mappa')),
-        );
+      // Try native maps app first (geo: URI)
+      final geoUrl = Uri.parse('geo:$latitude,$longitude');
+      if (await canLaunchUrl(geoUrl)) {
+        await launchUrl(geoUrl);
+        return;
       }
+      
+      // Fallback to browser-based Google Maps
+      final webUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+      if (await canLaunchUrl(webUrl)) {
+        await launchUrl(webUrl, mode: LaunchMode.externalApplication);
+        return;
+      }
+      
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Impossibile aprire la mappa')),
+      );
     } catch (e) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
