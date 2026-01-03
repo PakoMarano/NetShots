@@ -27,9 +27,10 @@ class FollowButton extends StatelessWidget {
               }
             },
       style: ElevatedButton.styleFrom(
-        backgroundColor: isFollowing ? Colors.grey.shade200 : primary,
-        foregroundColor: isFollowing ? Colors.black87 : Colors.white,
+        backgroundColor: isFollowing ? Colors.grey.shade200 : Colors.white,
+        foregroundColor: isFollowing ? Colors.black87 : primary,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        side: isFollowing ? null : BorderSide(color: primary, width: 2),
       ),
       child: isLoading
           ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))

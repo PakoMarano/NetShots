@@ -20,15 +20,20 @@ class StatsScreen extends StatelessWidget {
       child: Consumer<StatsViewModel>(
         builder: (context, viewModel, _) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Stats')),
+            appBar: AppBar(title: const Text('Statistiche')),
             body: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Andamento punteggio cumulativo (+10 vittoria / -5 sconfitta)',
+                    'Andamento punteggio cumulativo',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '(+10 vittoria / -5 sconfitta)',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   _buildBody(viewModel),
@@ -54,12 +59,230 @@ class StatsScreen extends StatelessWidget {
       return const Center(child: Text('Nessuna partita registrata al momento'));
     }
 
-    return SizedBox(
-      height: 280,
-      width: double.infinity,
-      child: CustomPaint(
-        painter: ScoreGraphPainter(viewModel.cumulativeScores),
+    if (viewModel.cumulativeScores.length == 1) {
+      return const Center(child: Text('Serve almeno una seconda partita per visualizzare il grafico'));
+    }
+
+    final currentScore = viewModel.cumulativeScores.last;
+    final minScore = viewModel.cumulativeScores.reduce((a, b) => a < b ? a : b);
+    final maxScore = viewModel.cumulativeScores.reduce((a, b) => a > b ? a : b);
+
+    return Expanded(
+      child: Column(
+        children: [
+          // Current score display
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blueAccent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildScoreInfo('Punteggio Attuale', currentScore, Colors.blueAccent),
+                _buildScoreInfo('Massimo', maxScore, Colors.green),
+                _buildScoreInfo('Minimo', minScore, Colors.red),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Graph
+          Expanded(
+            child: Row(
+              children: [
+                // Y-axis labels
+                SizedBox(
+                  width: 40,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: _buildYAxisLabels(minScore, maxScore),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Graph
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GestureDetector(
+                        onTapDown: (details) {
+                          _handleGraphTap(
+                            details.localPosition,
+                            Size(constraints.maxWidth, constraints.maxHeight),
+                            viewModel.cumulativeScores,
+                            viewModel.matchResults,
+                            context,
+                          );
+                        },
+                        child: CustomPaint(
+                          painter: ScoreGraphPainter(viewModel.cumulativeScores),
+                          size: Size(constraints.maxWidth, constraints.maxHeight),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // X-axis label
+          Padding(
+            padding: const EdgeInsets.only(left: 48),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('1', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('Partita ${viewModel.cumulativeScores.length}', 
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+              ],
+            ),
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildScoreInfo(String label, int value, Color color) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value.toString(),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildYAxisLabels(int minScore, int maxScore) {
+    final range = maxScore - minScore;
+    final step = range == 0 ? 1 : (range / 4).ceil();
+    
+    return List.generate(5, (index) {
+      final value = maxScore - (step * index);
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        child: Text(
+          value.toString(),
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      );
+    });
+  }
+
+  void _handleGraphTap(
+    Offset tapPosition,
+    Size graphSize,
+    List<int> scores,
+    List<bool> matchResults,
+    BuildContext context,
+  ) {
+    if (scores.isEmpty) return;
+
+    final double width = graphSize.width;
+    final double height = graphSize.height;
+
+    final int maxScore = scores.reduce((a, b) => a > b ? a : b);
+    final int minScore = scores.reduce((a, b) => a < b ? a : b);
+    final double range = (maxScore - minScore).abs() < 1 ? 1 : (maxScore - minScore).toDouble();
+
+    double xStep = scores.length == 1 ? 0 : width / (scores.length - 1);
+
+    // Find nearest point
+    int? nearestIndex;
+    double minDistance = 20; // Touch tolerance
+
+    for (int i = 0; i < scores.length; i++) {
+      final double x = i * xStep;
+      final double normalized = (maxScore - scores[i]) / range;
+      final double y = normalized * height;
+      final Offset pointPos = Offset(x, y);
+
+      final double distance = (tapPosition - pointPos).distance;
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestIndex = i;
+      }
+    }
+
+    if (nearestIndex != null) {
+      _showMatchDetails(context, nearestIndex, scores, matchResults);
+    }
+  }
+
+  void _showMatchDetails(
+    BuildContext context,
+    int matchIndex,
+    List<int> scores,
+    List<bool> matchResults,
+  ) {
+    final isVictory = matchResults[matchIndex];
+    final score = scores[matchIndex];
+    final previousScore = matchIndex > 0 ? scores[matchIndex - 1] : 0;
+    final pointsEarned = score - previousScore;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Partita ${matchIndex + 1}'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    isVictory ? Icons.check_circle : Icons.cancel,
+                    color: isVictory ? Colors.green : Colors.red,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    isVictory ? 'Vittoria' : 'Sconfitta',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: isVictory ? Colors.green : Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Punti guadagnati: ${pointsEarned > 0 ? '+' : ''}$pointsEarned',
+                style: const TextStyle(fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Punteggio totale: $score',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Chiudi'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -129,10 +352,25 @@ class ScoreGraphPainter extends CustomPainter {
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
 
+    final Paint gridPaint = Paint()
+      ..color = Colors.grey.withValues(alpha: 0.25)
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
+
+    // Draw horizontal grid lines
+    for (int i = 0; i < 5; i++) {
+      final double y = (height / 4) * i;
+      canvas.drawLine(Offset(0, y), Offset(width, y), gridPaint);
+    }
+
     // Draw baseline at zero if within range
     if (minScore <= 0 && maxScore >= 0) {
       final double zeroY = ((maxScore - 0) / range) * height;
-      canvas.drawLine(Offset(0, zeroY), Offset(width, zeroY), axisPaint);
+      final Paint zeroPaint = Paint()
+        ..color = Colors.red.withValues(alpha: 0.5)
+        ..strokeWidth = 1.5
+        ..style = PaintingStyle.stroke;
+      canvas.drawLine(Offset(0, zeroY), Offset(width, zeroY), zeroPaint);
     }
 
     canvas.drawPath(fillPath, gradientPaint);
