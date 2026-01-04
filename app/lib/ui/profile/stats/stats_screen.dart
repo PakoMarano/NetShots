@@ -347,11 +347,6 @@ class ScoreGraphPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true;
 
-    final Paint axisPaint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.4)
-      ..strokeWidth = 1
-      ..style = PaintingStyle.stroke;
-
     final Paint gridPaint = Paint()
       ..color = Colors.grey.withValues(alpha: 0.25)
       ..strokeWidth = 0.8
