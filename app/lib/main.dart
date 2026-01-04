@@ -13,7 +13,7 @@ import 'package:netshots/data/repositories/search_repository.dart';
 import 'package:netshots/data/services/auth/auth_service_firebase.dart';
 import 'package:netshots/data/services/feed/feed_service_http.dart';
 import 'package:netshots/data/services/follow/follow_service_http.dart';
-import 'package:netshots/data/services/image/image_storage_service_firebase.dart';
+import 'package:netshots/data/services/image_storage/image_storage_service_firebase.dart';
 import 'package:netshots/data/services/match/match_service_http.dart';
 import 'package:netshots/data/services/profile/profile_service_http.dart';
 import 'package:netshots/data/services/search/search_service_http.dart';

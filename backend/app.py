@@ -365,7 +365,7 @@ def register_routes(app: Flask) -> None:
     @app.route('/api/match-results/<user_id>', methods=['GET'])
     def get_match_results(user_id: str) -> Tuple[Dict[str, Any], int]:
         matches = Match.query.filter_by(user_id=user_id).order_by(Match.date.asc()).all()  # Fetch matches ordered by date
-        results = [match.is_victory for match in matches]  # Assuming Match model has is_victory attribute
+        results = [match.is_victory for match in matches] 
         return jsonify(results), 200
 
 

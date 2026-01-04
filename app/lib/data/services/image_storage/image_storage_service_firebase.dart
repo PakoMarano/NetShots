@@ -3,7 +3,7 @@ import 'dart:isolate';
 import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image/image.dart' as img;
-import 'package:netshots/data/services/image/image_storage_service_interface.dart';
+import 'package:netshots/data/services/image_storage/image_storage_service_interface.dart';
 
 class ImageStorageServiceFirebase implements ImageStorageServiceInterface {
   final FirebaseStorage _firebaseStorage;
